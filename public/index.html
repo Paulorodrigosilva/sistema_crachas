@@ -1,523 +1,87 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Emissor de Crachás - Zebra ZC100</title>
-    <!-- Importando a biblioteca SheetJS para ler Excel (.xlsx / .xls) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; }
-        .container { display: flex; gap: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 1100px; margin: auto; }
-        .form-section { flex: 1.3; }
-        .preview-section { flex: 0.7; display: flex; flex-direction: column; align-items: center; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 11px; }
-        input, select { width: 100%; padding: 5px; box-sizing: border-box; font-size: 11px; }
-        .btn-acao { background: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 11px; }
-        .btn-acao:hover { background: #0056b3; }
-        .botoes-impressao { display: flex; gap: 8px; margin-top: 15px; }
+/* Configuração exata de Impressão Térmica para Zebra ZC100 */
+@media print {
+    @page {
+        size: 54mm 85.6mm;
+        margin: 0 !important;
+    }
 
-        /* Dimensões verticais do Cartão PVC CR-80 proporcional (54mm x 85.6mm) */
-        .badge-canvas {
-            width: 204px;
-            height: 323px;
-            border: 1px solid #ccc;
-            background: #fff;
-            position: relative;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            overflow: hidden;
-            box-sizing: border-box;
-        }
+    body, html {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 54mm !important;
+        height: 85.6mm !important;
+        background: #fff !important;
+        overflow: hidden !important;
+    }
 
-        /* FRENTE DO CRACHÁ (VERTICAL) */
-        #faceFrente { width: 100%; height: 100%; position: relative; display: block; }
-        
-        .topo-preto {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 65px;
-            background: #111;
-            color: #fff;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            text-align: center;
-            font-size: 10px;
-            font-weight: bold;
-            padding-bottom: 8px;
-            box-sizing: border-box;
-            letter-spacing: 0.5px;
-        }
+    /* Oculta os painéis, menus e botões de configuração na hora de imprimir */
+    .form-section, .tabs, .botoes-impressao, h3, p, .container > h3 {
+        display: none !important;
+    }
 
-        .foto-container {
-            position: absolute;
-            top: 75px;
-            left: 37px;
-            width: 130px;
-            height: 155px;
-            border: 1.5px dashed #999;
-            background: #eaeaea;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #555;
-        }
+    .container {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        max-width: 100% !important;
+    }
 
-        .baixo-preto {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 48px;
-            background: #111;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            box-sizing: border-box;
-        }
-        .logo-frente-img {
-            max-height: 98px;
-            max-width: 180px;
-            width: 80%;
-            object-fit: contain;
-            transform: translateY(-3px);
-        }
+    .preview-section {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 54mm !important;
+        height: 85.6mm !important;
+    }
 
-        /* VERSO DO CRACHÁ (VERTICAL) */
-        #faceVerso { 
-            width: 100%; 
-            height: 100%; 
-            position: relative; 
-            display: none; 
-            padding: 8px; 
-            box-sizing: border-box; 
-            background: #fff; 
-            flex-direction: column; 
-            justify-content: space-between; 
-        }
-        
-        .verso-topo { 
-            text-align: center; 
-            border-bottom: 1px solid #ddd; 
-            padding-bottom: 4px; 
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .logo-verso-img { 
-            max-height: 32px; 
-            width: 100%; 
-            object-fit: contain; 
-        }
-        
-        .verso-caixas {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-        }
-        .caixa-campo {
-            border: 1px solid #444;
-            border-radius: 3px;
-            padding: 4px 6px;
-            background: #fafafa;
-            font-size: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .caixa-campo span.titulo {
-            font-weight: bold;
-            color: #555;
-            font-size: 7px;
-            text-transform: uppercase;
-        }
-        .caixa-campo span.valor {
-            font-weight: bold;
-            color: #111;
-            font-size: 9px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    #badgeCanvas {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 54mm !important;
+        height: 85.6mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        z-index: 9999 !important;
+    }
 
-        .verso-rodape-cultura {
-            background: #f2f2f2;
-            border: 1px solid #ccc;
-            padding: 5px;
-            font-size: 7px;
-            line-height: 1.25;
-            color: #222;
-            text-align: justify;
-            border-radius: 3px;
-        }
-        .verso-rodape-cultura strong {
-            display: block;
-            color: #000;
-            margin-bottom: 1px;
-            font-size: 7.5px;
-            text-align: center;
-        }
+    /* Regras específicas para exibição correta de cada face na impressão */
+    body.imprimir-frente #faceFrente {
+        display: block !important;
+        visibility: visible !important;
+    }
+    body.imprimir-frente #faceVerso {
+        display: none !important;
+    }
 
-        .tabs { display: flex; margin-bottom: 8px; gap: 5px; }
-        .tabs button { margin: 0; padding: 5px; font-size: 11px; background: #6c757d; border: none; color: white; border-radius: 3px; cursor: pointer; flex: 1; }
-        .tabs button.active { background: #007bff; }
+    body.imprimir-verso #faceVerso {
+        display: flex !important;
+        visibility: visible !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    body.imprimir-verso #faceFrente {
+        display: none !important;
+    }
 
-        /* Configuração rigorosa de Impressão para Zebra ZC100 (Exatamente 1 página por face) */
-        @media print {
-            @page {
-                size: 54mm 85.6mm;
-                margin: 0;
-            }
+    /* Otimizações de nitidez térmica para a impressora Zebra */
+    img, .foto-container {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-            body, html {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 54mm !important;
-                height: 85.6mm !important;
-                background: #fff !important;
-                overflow: hidden !important;
-            }
-
-            body * { 
-                display: none !important; 
-                visibility: hidden !important;
-            }
-
-            body.imprimir-frente,
-            body.imprimir-frente #badgeCanvas,
-            body.imprimir-frente #faceFrente,
-            body.imprimir-frente #faceFrente * {
-                display: block !important;
-                visibility: visible !important;
-            }
-
-            body.imprimir-verso,
-            body.imprimir-verso #badgeCanvas,
-            body.imprimir-verso #faceVerso,
-            body.imprimir-verso #faceVerso * {
-                visibility: visible !important;
-            }
-
-            body.imprimir-verso #faceVerso {
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
-            }
-
-            #badgeCanvas {
-                position: fixed !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 54mm !important;
-                height: 85.6mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                border: none !important;
-                background: #fff !important;
-                z-index: 9999 !important;
-            }
-
-            img, .foto-container {
-                image-rendering: -webkit-optimize-contrast;
-                image-rendering: crisp-edges;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .topo-preto, .baixo-preto, .logo-verso-img, .logo-frente-img, .caixa-campo, .verso-rodape-cultura {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="form-section">
-            <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
-            
-            <!-- Botão de Importar Excel -->
-            <div class="form-group" style="background: #e9ecef; padding: 10px; border-radius: 5px; border: 1px dashed #ced4da;">
-                <label style="color: #0056b3;">📊 Importar Base de Dados (Excel):</label>
-                <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" onchange="importarExcel(event)">
-                <small id="statusPlanilha" style="color: #28a745; font-weight: bold; display: block; margin-top: 4px;"></small>
-            </div>
-
-            <form id="formCracha" onsubmit="event.preventDefault();">
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Matrícula (Digite para buscar):</label>
-                        <input type="text" id="txtMatricula" placeholder="Digite a matrícula..." oninput="buscarPorMatricula()">
-                    </div>
-                    <div class="form-group" style="flex: 1.5;">
-                        <label>Nome no Crachá:</label>
-                        <input type="text" id="txtNome" placeholder="Ex: ISABELA LIMA" oninput="sincronizarNomes()">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Origem da Foto:</label>
-                        <select id="tipoFoto" onchange="alternarOrigemFoto()">
-                            <option value="link">Link da Internet (URL)</option>
-                            <option value="pc">Arquivo do Computador</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;" id="divInputFotoLink">
-                        <label>Link da Foto:</label>
-                        <input type="text" id="txtFotoUrl" placeholder="https://..." oninput="atualizarCampos()">
-                    </div>
-                    <div class="form-group" style="flex: 1; display: none;" id="divInputFotoPc">
-                        <label>Arquivo da Foto (PC):</label>
-                        <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
-                    </div>
-                </div>
-
-                <hr style="margin: 10px 0; border:0; border-top:1px solid #ddd;">
-                <h4 style="margin: 0 0 6px 0; font-size: 12px; color: #444;">Dados do Verso</h4>
-
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1.5;">
-                        <label>RG:</label>
-                        <input type="text" id="txtRg" placeholder="00.000.000-0" oninput="atualizarCampos()">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Data de Admissão:</label>
-                        <input type="text" id="txtAdmissao" placeholder="DD/MM/AAAA" oninput="atualizarCampos()">
-                    </div>
-                </div>
-            </form>
-
-            <div class="botoes-impressao">
-                <button class="btn-acao" style="background: #28a745;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
-                <button class="btn-acao" style="background: #17a2b8;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
-            </div>
-        </div>
-
-        <div class="preview-section">
-            <h3 style="margin-top:0; font-size: 14px;">Pré-visualização</h3>
-            <div class="tabs">
-                <button id="btnTabFrente" class="active" onclick="mudarFace('frente')">Frente</button>
-                <button id="btnTabVerso" onclick="mudarFace('verso')">Verso</button>
-            </div>
-
-            <!-- Canvas do Crachá Vertical (54mm x 85.6mm) -->
-            <div id="badgeCanvas" class="badge-canvas">
-                
-                <!-- FRENTE -->
-                <div id="faceFrente">
-                    <div class="topo-preto" id="elNomeFrente">NOME DO COLABORADOR</div>
-                    <div class="foto-container" id="elFoto">Foto 3x4</div>
-                    <div class="baixo-preto">
-                        <img id="elLogoFrente" class="logo-frente-img" alt="Logo Frente">
-                    </div>
-                </div>
-
-                <!-- VERSO -->
-                <div id="faceVerso">
-                    <div class="verso-topo">
-                        <img id="elLogoVerso" class="logo-verso-img" alt="Logo Verso">
-                    </div>
-                    
-                    <div class="verso-caixas">
-                        <div class="caixa-campo">
-                            <span class="titulo">Nome Completo:</span>
-                            <span class="valor" id="elNomeVerso">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">RG:</span>
-                            <span class="valor" id="elRg">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Data de Admissão:</span>
-                            <span class="valor" id="elAdmissao">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Matrícula:</span>
-                            <span class="valor" id="elMatricula">---</span>
-                        </div>
-                    </div>
-
-                    <div class="verso-rodape-cultura">
-                        <strong>NOSSA CULTURA:</strong>
-                        SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.
-                    </div>
-                </div>
-
-            </div>
-            <p style="font-size: 10px; color: #666; margin-top: 6px; text-align: center;">Zebra ZC100: Formato 54x85.6mm configurado.</p>
-        </div>
-    </div>
-
-    <script>
-        let fotoBase64 = '';
-        let baseDadosColaboradores = [];
-
-        window.onload = function() {
-            const baseUrl = window.location.origin;
-            document.getElementById('elLogoFrente').src = baseUrl + '/imagem/logo-frente.png';
-            document.getElementById('elLogoVerso').src = baseUrl + '/imagem/logo-verso.png';
-        };
-
-        // Função para corrigir datas do Excel (converte número serial para DD/MM/AAAA)
-        function formatarDataExcel(valor) {
-            if (!valor) return '';
-            // Se já for uma string (ex: "10/05/2023"), retorna ela mesma
-            if (isNaN(valor)) return String(valor);
-            
-            // Se for número serial do Excel
-            const num = Number(valor);
-            const dataBase = new Date(1899, 11, 30);
-            dataBase.setDate(dataBase.getDate() + num);
-            
-            const dia = String(dataBase.getDate()).padStart(2, '0');
-            const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
-            const ano = dataBase.getFullYear();
-            
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        function importarExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-
-                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
-                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function buscarPorMatricula() {
-            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
-            
-            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
-
-            const colaborador = baseDadosColaboradores.find(item => {
-                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
-                return mat === matriculaDigitada;
-            });
-
-            if (colaborador) {
-                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
-                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
-                
-                // Pega a data bruta da planilha e converte corretamente para formato DD/MM/AAAA
-                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
-                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
-
-                sincronizarNomes();
-                atualizarCampos();
-            }
-        }
-
-        function sincronizarNomes() {
-            const nome = document.getElementById('txtNome').value.toUpperCase();
-            document.getElementById('elNomeFrente').innerText = nome || 'NOME DO COLABORADOR';
-            document.getElementById('elNomeVerso').innerText = document.getElementById('txtNome').value || '---';
-        }
-
-        function alternarOrigemFoto() {
-            const tipo = document.getElementById('tipoFoto').value;
-            if (tipo === 'link') {
-                document.getElementById('divInputFotoLink').style.display = 'block';
-                document.getElementById('divInputFotoPc').style.display = 'none';
-            } else {
-                document.getElementById('divInputFotoLink').style.display = 'none';
-                document.getElementById('divInputFotoPc').style.display = 'block';
-            }
-            atualizarCampos();
-        }
-
-        function carregarFotoLocal(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoBase64 = e.target.result;
-                    const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function atualizarCampos() {
-            const tipo = document.getElementById('tipoFoto').value;
-            const elFoto = document.getElementById('elFoto');
-
-            if (tipo === 'link') {
-                const fotoUrl = document.getElementById('txtFotoUrl').value;
-                if (fotoUrl) {
-                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            }
-
-            document.getElementById('elRg').innerText = document.getElementById('txtRg').value || '---';
-            document.getElementById('elAdmissao').innerText = document.getElementById('txtAdmissao').value || '---';
-            document.getElementById('elMatricula').innerText = document.getElementById('txtMatricula').value || '---';
-        }
-
-        function mudarFace(face) {
-            const faceFrente = document.getElementById('faceFrente');
-            const faceVerso = document.getElementById('faceVerso');
-            const btnFrente = document.getElementById('btnTabFrente');
-            const btnVerso = document.getElementById('btnTabVerso');
-
-            if (face === 'frente') {
-                faceFrente.style.display = 'block';
-                faceVerso.style.display = 'none';
-                btnFrente.classList.add('active');
-                btnVerso.classList.remove('active');
-            } else {
-                faceFrente.style.display = 'none';
-                faceVerso.style.display = 'flex'; 
-                btnVerso.classList.add('active');
-                btnFrente.classList.remove('active');
-            }
-        }
-
-        function imprimir(face) {
-            const body = document.body;
-            body.classList.remove('imprimir-frente', 'imprimir-verso');
-            
-            if (face === 'frente') {
-                body.classList.add('imprimir-frente');
-            } else {
-                body.classList.add('imprimir-verso');
-            }
-            window.print();
-        }
-    </script>
-</body>
-</html>
+    .topo-preto, .baixo-preto, .logo-verso-img, .logo-frente-img, .caixa-campo, .verso-rodape-cultura {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
