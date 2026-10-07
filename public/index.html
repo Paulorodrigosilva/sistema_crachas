@@ -187,4 +187,301 @@
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex: 1.5;">
                         <label>RG:</label>
-                        <input type="
+                        <input type="text" id="txtRg" placeholder="00.000.000-0" oninput="atualizarCampos()">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Data de Admissão:</label>
+                        <input type="text" id="txtAdmissao" placeholder="DD/MM/AAAA" oninput="atualizarCampos()">
+                    </div>
+                </div>
+
+                <!-- Campo Editável do Rodapé do Verso -->
+                <div class="form-group">
+                    <label>Texto / Cultura do Rodapé (Verso):</label>
+                    <textarea id="txtRodape" rows="2" oninput="atualizarRodape()">SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.</textarea>
+                </div>
+            </form>
+
+            <div class="botoes-impressao">
+                <button class="btn-acao" style="background: #28a745;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
+                <button class="btn-acao" style="background: #17a2b8;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h3 style="margin-top:0; font-size: 14px;">Pré-visualização</h3>
+            <div class="tabs">
+                <button id="btnTabFrente" class="active" onclick="mudarFace('frente')">Frente</button>
+                <button id="btnTabVerso" onclick="mudarFace('verso')">Verso</button>
+            </div>
+
+            <!-- Canvas do Crachá Dinâmico -->
+            <div id="badgeCanvas" class="badge-canvas vertical">
+                
+                <!-- FRENTE -->
+                <div id="faceFrente">
+                    <div class="topo-bloco" id="elTopoFrente">NOME DO COLABORADOR</div>
+                    <div class="foto-container" id="elFoto">Foto 3x4</div>
+                    <div class="baixo-bloco" id="elBaixoFrente">
+                        <img id="elLogoFrente" class="logo-frente-img" alt="Logo Frente">
+                    </div>
+                    <div id="elDadosHoriz" class="dados-horiz" style="display: none;">
+                        <div class="caixa-campo"><span class="titulo">RG:</span> <span class="valor" id="elRgHoriz">---</span></div>
+                        <div class="caixa-campo"><span class="titulo">Admissão:</span> <span class="valor" id="elAdmissaoHoriz">---</span></div>
+                        <div class="caixa-campo"><span class="titulo">Matrícula:</span> <span class="valor" id="elMatriculaHoriz">---</span></div>
+                    </div>
+                </div>
+
+                <!-- VERSO -->
+                <div id="faceVerso">
+                    <div class="verso-topo">
+                        <img id="elLogoVerso" class="logo-verso-img" alt="Logo Verso">
+                    </div>
+                    
+                    <div class="verso-caixas">
+                        <div class="caixa-campo">
+                            <span class="titulo">Nome Completo:</span>
+                            <span class="valor" id="elNomeVerso">---</span>
+                        </div>
+                        <div class="caixa-campo">
+                            <span class="titulo">RG:</span>
+                            <span class="valor" id="elRg">---</span>
+                        </div>
+                        <div class="caixa-campo">
+                            <span class="titulo">Data de Admissão:</span>
+                            <span class="valor" id="elAdmissao">---</span>
+                        </div>
+                        <div class="caixa-campo">
+                            <span class="titulo">Matrícula:</span>
+                            <span class="valor" id="elMatricula">---</span>
+                        </div>
+                    </div>
+
+                    <div class="verso-rodape-cultura" id="elRodapeVisual">
+                        <strong>NOSSA CULTURA:</strong>
+                        SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.
+                    </div>
+                </div>
+
+            </div>
+            <p style="font-size: 10px; color: #666; margin-top: 6px; text-align: center;">Zebra ZC100: Formato configurado.</p>
+        </div>
+    </div>
+
+    <script>
+        let fotoBase64 = '';
+        let baseDadosColaboradores = [];
+
+        window.onload = function() {
+            mudarTemplate();
+            atualizarRodape();
+        };
+
+        // Gerenciador dos 10 Modelos Diferentes
+        function mudarTemplate() {
+            const template = document.getElementById('selectTemplate').value;
+            const canvas = document.getElementById('badgeCanvas');
+            const topo = document.getElementById('elTopoFrente');
+            const baixo = document.getElementById('elBaixoFrente');
+            const dadosHoriz = document.getElementById('elDadosHoriz');
+
+            let corFundo = '#111';
+            let isHorizontal = false;
+
+            if (template.includes('executivo-azul')) corFundo = '#004080';
+            else if (template.includes('moderno-verde')) corFundo = '#006633';
+            else if (template.includes('elegante-vinho')) corFundo = '#660033';
+            else if (template.includes('alerta-laranja')) corFundo = '#cc5500';
+            else if (template.includes('clean-cinza')) corFundo = '#555555';
+
+            if (template.startsWith('h-')) {
+                isHorizontal = true;
+            }
+
+            if (isHorizontal) {
+                canvas.className = 'badge-canvas horizontal';
+                topo.style.background = corFundo;
+                topo.style.color = '#fff';
+                baixo.style.background = corFundo;
+                baixo.style.display = 'flex';
+                dadosHoriz.style.display = 'flex';
+            } else {
+                canvas.className = 'badge-canvas vertical';
+                topo.style.background = corFundo;
+                topo.style.color = '#fff';
+                baixo.style.background = corFundo;
+                baixo.style.display = 'flex';
+                dadosHoriz.style.display = 'none';
+            }
+        }
+
+        function atualizarRodape() {
+            const textoDigitado = document.getElementById('txtRodape').value;
+            document.getElementById('elRodapeVisual').innerHTML = `<strong>NOSSA CULTURA:</strong> ${textoDigitado}`;
+        }
+
+        // Uploads das Logos
+        function carregarLogoFrente(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('elLogoFrente').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function carregarLogoVerso(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('elLogoVerso').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function formatarDataExcel(valor) {
+            if (!valor) return '';
+            if (isNaN(valor)) return String(valor);
+            const num = Number(valor);
+            const dataBase = new Date(1899, 11, 30);
+            dataBase.setDate(dataBase.getDate() + num);
+            const dia = String(dataBase.getDate()).padStart(2, '0');
+            const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
+            const ano = dataBase.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function importarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
+                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function buscarPorMatricula() {
+            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
+            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
+            const colaborador = baseDadosColaboradores.find(item => {
+                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
+                return mat === matriculaDigitada;
+            });
+            if (colaborador) {
+                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
+                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
+                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
+                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
+                sincronizarNomes();
+                atualizarCampos();
+            }
+        }
+
+        function sincronizarNomes() {
+            const nome = document.getElementById('txtNome').value.toUpperCase();
+            document.getElementById('elTopoFrente').innerText = nome || 'NOME DO COLABORADOR';
+            document.getElementById('elNomeVerso').innerText = document.getElementById('txtNome').value || '---';
+        }
+
+        function alternarOrigemFoto() {
+            const tipo = document.getElementById('tipoFoto').value;
+            if (tipo === 'link') {
+                document.getElementById('divInputFotoLink').style.display = 'block';
+                document.getElementById('divInputFotoPc').style.display = 'none';
+            } else {
+                document.getElementById('divInputFotoLink').style.display = 'none';
+                document.getElementById('divInputFotoPc').style.display = 'block';
+            }
+            atualizarCampos();
+        }
+
+        function carregarFotoLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
+                    const elFoto = document.getElementById('elFoto');
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function atualizarCampos() {
+            const tipo = document.getElementById('tipoFoto').value;
+            const elFoto = document.getElementById('elFoto');
+            if (tipo === 'link') {
+                const fotoUrl = document.getElementById('txtFotoUrl').value;
+                if (fotoUrl) {
+                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
+                    elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            } else {
+                if (fotoBase64) {
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            }
+
+            const rgVal = document.getElementById('txtRg').value || '---';
+            const admVal = document.getElementById('txtAdmissao').value || '---';
+            const matVal = document.getElementById('txtMatricula').value || '---';
+
+            document.getElementById('elRg').innerText = rgVal;
+            document.getElementById('elAdmissao').innerText = admVal;
+            document.getElementById('elMatricula').innerText = matVal;
+
+            document.getElementById('elRgHoriz').innerText = rgVal;
+            document.getElementById('elAdmissaoHoriz').innerText = admVal;
+            document.getElementById('elMatriculaHoriz').innerText = matVal;
+        }
+
+        function mudarFace(face) {
+            const faceFrente = document.getElementById('faceFrente');
+            const faceVerso = document.getElementById('faceVerso');
+            const btnFrente = document.getElementById('btnTabFrente');
+            const btnVerso = document.getElementById('btnTabVerso');
+            if (face === 'frente') {
+                faceFrente.style.display = 'block';
+                faceVerso.style.display = 'none';
+                btnFrente.classList.add('active');
+                btnVerso.classList.remove('active');
+            } else {
+                faceFrente.style.display = 'none';
+                faceVerso.style.display = 'flex'; 
+                btnVerso.classList.add('active');
+                btnFrente.classList.remove('active');
+            }
+        }
+
+        function imprimir(face) {
+            const body = document.body;
+            body.classList.remove('imprimir-frente', 'imprimir-verso');
+            if (face === 'frente') {
+                body.classList.add('imprimir-frente');
+            } else {
+                body.classList.add('imprimir-verso');
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
