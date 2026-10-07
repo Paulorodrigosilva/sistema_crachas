@@ -5,55 +5,74 @@
     <title>Emissor de Crachás - SyncStore & Zebra ZC100</title>
     <!-- Importando a biblioteca SheetJS para ler Excel (.xlsx / .xls) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Importando a biblioteca html2canvas para gerar a imagem do crachá -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; margin: 0; }
         
-        /* Estilos da Tela de Login */
+        /* Estilos da Nova Tela de Login (Split-Screen Moderna) */
         #loginOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 99999;
+            background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 99999;
         }
-        .login-card {
-            background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            width: 320px; text-align: center; box-sizing: border-box;
+        .auth-layout {
+            display: flex; width: 100%; height: 100vh; background: #fff;
         }
-        .login-logo {
-            font-size: 22px; font-weight: bold; color: #007bff; margin-bottom: 20px;
-            letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        .auth-intro {
+            flex: 1; background: linear-gradient(135deg, #0d6efd 0%, #004080 100%); color: white;
+            padding: 60px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;
         }
-        .login-logo span { color: #333; }
-        .login-card .form-group { margin-bottom: 12px; text-align: left; }
-        .login-error { color: #dc3545; font-size: 11px; margin-top: 8px; display: none; }
-        .info-credenciais { background: #f8f9fa; border: 1px solid #ddd; padding: 8px; border-radius: 4px; font-size: 10px; color: #666; margin-top: 15px; text-align: left; line-height: 1.4; }
+        .brand { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; }
+        .brand-mark { background: white; color: #004080; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; }
+        .brand-period { color: #ffc107; }
+        .intro-copy h1 { font-size: 38px; line-height: 1.2; margin: 20px 0; }
+        .intro-copy h1 span { color: #ffc107; }
+        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.8; font-weight: bold; }
+        .intro-note { font-size: 14px; opacity: 0.9; }
+        .intro-foot { font-size: 12px; display: flex; align-items: center; gap: 8px; opacity: 0.85; }
+        .status-dot { width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #28a745; }
 
+        .auth-panel {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; background: #ffffff;
+        }
+        .auth-box { width: 100%; max-width: 380px; }
+        .auth-box h2 { font-size: 24px; margin: 5px 0 8px 0; color: #111; }
+        .muted { color: #666; font-size: 13px; margin-bottom: 25px; }
+        
+        .form-stack { display: flex; flex-direction: column; gap: 15px; }
+        .field { display: flex; flex-direction: column; font-size: 12px; font-weight: bold; color: #333; gap: 5px; }
+        .field input { width: 100%; padding: 10px 12px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+        .field input:focus { border-color: #0d6efd; outline: none; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); }
+
+        .button-primary {
+            background: #0d6efd; color: white; border: none; padding: 11px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;
+        }
+        .button-primary:hover { background: #0b5ed7; }
+        .login-error { color: #dc3545; font-size: 12px; margin-top: 5px; display: none; }
+        
+        .auth-caption { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 40px; text-align: center; }
+
+        /* Estilos do Sistema Principal */
         .container { display: flex; gap: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 1100px; margin: auto; }
         .form-section { flex: 1.3; }
         .preview-section { flex: 0.7; display: flex; flex-direction: column; align-items: center; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 11px; }
-        input, select, textarea { width: 100%; padding: 5px; box-sizing: border-box; font-size: 11px; }
-        .btn-acao { background: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 11px; width: 100%; }
+        .form-section label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 11px; }
+        .form-section input, .form-section select, .form-section textarea { width: 100%; padding: 5px; box-sizing: border-box; font-size: 11px; }
+        .btn-acao { background: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 11px; }
         .btn-acao:hover { background: #0056b3; }
         .botoes-impressao { display: flex; gap: 8px; margin-top: 15px; }
 
         /* Dimensões dinâmicas do Canvas (Vertical vs Horizontal) */
         .badge-canvas {
-            border: 1px solid #ccc;
-            background: #fff;
-            position: relative;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            overflow: hidden;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+            border: 1px solid #ccc; background: #fff; position: relative; border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15); overflow: hidden; box-sizing: border-box; transition: all 0.3s ease;
         }
-
         .badge-canvas.vertical { width: 204px; height: 323px; }
         .badge-canvas.horizontal { width: 323px; height: 204px; }
 
         /* ================= LAYOUTS VERTICAIS ================= */
         .vertical #faceFrente, .vertical #faceVerso { width: 100%; height: 100%; position: relative; }
-        
         .vertical .topo-bloco {
             position: absolute; top: 0; left: 0; width: 100%; height: 68px;
             display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
@@ -61,10 +80,9 @@
         }
         .vertical .topo-bloco .nome-colaborador { font-size: 10px; font-weight: bold; line-height: 1.1; }
         .vertical .topo-bloco .funcao-colaborador { font-size: 8px; font-weight: normal; margin-top: 2px; opacity: 0.9; text-transform: uppercase; }
-
         .vertical .foto-container {
             position: absolute; top: 78px; left: 37px; width: 130px; height: 150px;
-            border: 1.5px dashed #999; background: #eaeaea; background-size: cover; background-position: center;
+            border: none; background: #eaeaea; background-size: cover; background-position: center;
             display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555;
         }
         .vertical .baixo-bloco {
@@ -86,10 +104,9 @@
 
         /* ================= LAYOUTS HORIZONTAIS ================= */
         .horizontal #faceFrente, .horizontal #faceVerso { width: 100%; height: 100%; position: relative; }
-        
         .horizontal .foto-container {
             position: absolute; top: 15px; left: 15px; width: 100px; height: 125px;
-            border: 1.5px dashed #999; background: #eaeaea; background-size: cover; background-position: center;
+            border: none; background: #eaeaea; background-size: cover; background-position: center;
             display: flex; align-items: center; justify-content: center; font-size: 9px; color: #555;
         }
         .horizontal .topo-bloco {
@@ -99,7 +116,6 @@
         }
         .horizontal .topo-bloco .nome-colaborador { font-size: 10px; font-weight: bold; line-height: 1.1; }
         .horizontal .topo-bloco .funcao-colaborador { font-size: 8px; font-weight: normal; margin-top: 2px; text-transform: uppercase; }
-
         .horizontal .baixo-bloco {
             position: absolute; bottom: 15px; left: 15px; width: 100px; height: 35px;
             display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
@@ -139,33 +155,53 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN PERSONALIZADA (ESTILO SPLIT-SCREEN) -->
     <div id="loginOverlay">
-        <div class="login-card">
-            <div class="login-logo">
-                🏢 <span>SyncStore</span>
-            </div>
-            <form onsubmit="realizarLogin(event)">
-                <div class="form-group">
-                    <label>Usuário / E-mail:</label>
-                    <input type="text" id="loginUser" placeholder="Digite seu e-mail..." required>
+        <main class="auth-layout">
+            <section class="auth-intro">
+                <div class="brand">
+                    <span class="brand-mark">S</span>
+                    <span>SyncStore<span class="brand-period">.</span></span>
                 </div>
-                <div class="form-group">
-                    <label>Senha:</label>
-                    <input type="password" id="loginPass" placeholder="Digite sua senha..." required>
+                <div class="intro-copy">
+                    <p class="eyebrow">EMISSÃO DE CRACHÁS</p>
+                    <h1>Identidade e<br>segurança,<br><span>no crachá certo.</span></h1>
+                    <p class="intro-note">Geração rápida, importação em lote e compatibilidade com Zebra ZC100.</p>
                 </div>
-                <div id="loginError" class="login-error">Usuário ou senha inválidos!</div>
-                <button type="submit" class="btn-acao" style="margin-top: 10px;">Entrar no Sistema</button>
-            </form>
-            <div class="info-credenciais">
-                <strong>💡 Contas de Acesso:</strong><br>
-                • <code>prodrigosilvacel@gmail.com</code> / <code>W18187</code><br>
-                • <code>suporte.sync@syncstore.com</code> / <code>sync789</code><br>
-                • <code>operador.sync@syncstore.com</code> / <code>sync321</code>
-            </div>
-        </div>
+                <div class="intro-foot">
+                    <span class="status-dot"></span> Sistema pronto para impressão
+                </div>
+            </section>
+            
+            <section class="auth-panel">
+                <div class="auth-box">
+                    <div class="brand" style="color: #111; margin-bottom: 15px;">
+                        <span class="brand-mark" style="background: #004080; color: white;">Z</span>
+                        <span>Zebra ZC100</span>
+                    </div>
+                    <p class="eyebrow">BEM-VINDO DE VOLTA</p>
+                    <h2>Acesse sua conta</h2>
+                    <p class="muted">Entre com suas credenciais para emitir crachás.</p>
+                
+                    <form onsubmit="realizarLogin(event)" class="form-stack">
+                        <label class="field">
+                            E-mail de Acesso
+                            <input type="text" id="loginUser" autocomplete="email" required placeholder="seu.email@syncstore.com">
+                        </label>
+                        <label class="field">
+                            Senha
+                            <input type="password" id="loginPass" autocomplete="current-password" required placeholder="••••••••">
+                        </label>
+                        <div id="loginError" class="login-error">E-mail ou senha incorretos. Tente novamente.</div>
+                        <button type="submit" class="button-primary">Entrar <span aria-hidden="true">↗</span></button>
+                    </form>
+                </div>
+                <p class="auth-caption">CRIAÇÃO DE CRACHÁS. AGILIDADE E PADRÃO CORPORATIVO.</p>
+            </section>
+        </main>
     </div>
 
+    <!-- APLICAÇÃO PRINCIPAL -->
     <div class="container">
         <div class="form-section">
             <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
@@ -215,22 +251,10 @@
                     <input type="text" id="txtFuncao" placeholder="Ex: Analista de Suporte" oninput="sincronizarFuncao()">
                 </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Origem da Foto:</label>
-                        <select id="tipoFoto" onchange="alternarOrigemFoto()">
-                            <option value="link">Link da Internet</option>
-                            <option value="pc">Arquivo do PC</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;" id="divInputFotoLink">
-                        <label>Link da Foto:</label>
-                        <input type="text" id="txtFotoUrl" placeholder="https://..." oninput="atualizarCampos()">
-                    </div>
-                    <div class="form-group" style="flex: 1; display: none;" id="divInputFotoPc">
-                        <label>Arquivo Foto (PC):</label>
-                        <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
-                    </div>
+                <!-- Seleção de Foto do Colaborador (PC) -->
+                <div class="form-group">
+                    <label>Foto do Colaborador (PC):</label>
+                    <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
                 </div>
 
                 <!-- Configuração de Logos, Medidas e Movimentação -->
@@ -298,8 +322,11 @@
             </form>
 
             <div class="botoes-impressao">
-                <button class="btn-acao" style="background: #28a745;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
-                <button class="btn-acao" style="background: #17a2b8;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
+                <button class="btn-acao" style="background: #28a745; flex: 1;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
+                <button class="btn-acao" style="background: #17a2b8; flex: 1;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
+            </div>
+            <div style="margin-top: 8px;">
+                <button class="btn-acao" style="background: #6f42c1; width: 100%; padding: 10px;" onclick="baixarCrachaImagem()">💾 Gerar e Baixar Crachá (Imagem)</button>
             </div>
         </div>
 
@@ -371,7 +398,7 @@
     </div>
 
     <script>
-        // Usuários permitidos no sistema (Principal + 2 gerados aleatoriamente)
+        // Lista de contas autorizadas
         const usuariosPermitidos = [
             { usuario: "prodrigosilvacel@gmail.com", senha: "W18187" },
             { usuario: "suporte.sync@syncstore.com", senha: "sync789" },
@@ -380,12 +407,12 @@
 
         function realizarLogin(event) {
             event.preventDefault();
-            const userDigitado = document.getElementById('loginUser').value.trim();
+            const userDigitado = document.getElementById('loginUser').value.trim().toLowerCase();
             const passDigitado = document.getElementById('loginPass').value.trim();
             const erroEl = document.getElementById('loginError');
 
             const usuarioEncontrado = usuariosPermitidos.find(
-                u => u.usuario === userDigitado && u.senha === passDigitado
+                u => u.usuario.toLowerCase() === userDigitado && u.senha === passDigitado
             );
 
             if (usuarioEncontrado) {
@@ -511,6 +538,20 @@
             }
         }
 
+        function carregarFotoLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
+                    const elFoto = document.getElementById('elFoto');
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function formatarDataExcel(valor) {
             if (!valor) return '';
             if (isNaN(valor)) return String(valor);
@@ -557,52 +598,14 @@
             }
         }
 
-        function alternarOrigemFoto() {
-            const tipo = document.getElementById('tipoFoto').value;
-            if (tipo === 'link') {
-                document.getElementById('divInputFotoLink').style.display = 'block';
-                document.getElementById('divInputFotoPc').style.display = 'none';
-            } else {
-                document.getElementById('divInputFotoLink').style.display = 'none';
-                document.getElementById('divInputFotoPc').style.display = 'block';
-            }
-            atualizarCampos();
-        }
-
-        function carregarFotoLocal(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoBase64 = e.target.result;
-                    const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
         function atualizarCampos() {
-            const tipo = document.getElementById('tipoFoto').value;
             const elFoto = document.getElementById('elFoto');
-            if (tipo === 'link') {
-                const fotoUrl = document.getElementById('txtFotoUrl').value;
-                if (fotoUrl) {
-                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
+            if (fotoBase64) {
+                elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                elFoto.innerText = '';
             } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
+                elFoto.style.backgroundImage = 'none';
+                elFoto.innerText = 'Foto 3x4';
             }
 
             const rgVal = document.getElementById('txtRg').value || '---';
@@ -645,6 +648,21 @@
                 body.classList.add('imprimir-verso');
             }
             window.print();
+        }
+
+        function baixarCrachaImagem() {
+            const canvasEl = document.getElementById('badgeCanvas');
+            const faceFrente = document.getElementById('faceFrente');
+            const isFrenteVisivel = faceFrente.style.display !== 'none';
+            const ladoNome = isFrenteVisivel ? 'frente' : 'verso';
+            const nomeColab = document.getElementById('txtNome').value.trim() || 'colaborador';
+
+            html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `cracha-${ladoNome}-${nomeColab.toLowerCase().replace(/\s+/g, '-')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         }
     </script>
 </body>
