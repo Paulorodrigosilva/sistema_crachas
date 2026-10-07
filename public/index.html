@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Emissor de Crachás - Zebra ZC100</title>
+    <!-- Importando a biblioteca SheetJS para ler Excel (.xlsx / .xls) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; }
         .container { display: flex; gap: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 1100px; margin: auto; }
@@ -31,7 +33,6 @@
         /* FRENTE DO CRACHÁ (VERTICAL) */
         #faceFrente { width: 100%; height: 100%; position: relative; display: block; }
         
-        /* Tarja preta do topo maior */
         .topo-preto {
             position: absolute;
             top: 0;
@@ -51,7 +52,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Foto deslocada mais para baixo */
         .foto-container {
             position: absolute;
             top: 75px;
@@ -233,10 +233,23 @@
         <div class="form-section">
             <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
             
+            <!-- Botão de Importar Excel -->
+            <div class="form-group" style="background: #e9ecef; padding: 10px; border-radius: 5px; border: 1px dashed #ced4da;">
+                <label style="color: #0056b3;">📊 Importar Base de Dados (Excel):</label>
+                <input type="file" id="fileExcel" accept=".xlsx, .xls, .csv" onchange="importarExcel(event)">
+                <small id="statusPlanilha" style="color: #28a745; font-weight: bold; display: block; margin-top: 4px;"></small>
+            </div>
+
             <form id="formCracha" onsubmit="event.preventDefault();">
-                <div class="form-group">
-                    <label>Nome no Crachá (Frente e Verso automático):</label>
-                    <input type="text" id="txtNome" placeholder="Ex: ISABELA LIMA" oninput="sincronizarNomes()">
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Matrícula (Digite para buscar):</label>
+                        <input type="text" id="txtMatricula" placeholder="Digite a matrícula..." oninput="buscarPorMatricula()">
+                    </div>
+                    <div class="form-group" style="flex: 1.5;">
+                        <label>Nome no Crachá:</label>
+                        <input type="text" id="txtNome" placeholder="Ex: ISABELA LIMA" oninput="sincronizarNomes()">
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
@@ -266,14 +279,9 @@
                         <input type="text" id="txtRg" placeholder="00.000.000-0" oninput="atualizarCampos()">
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label>Matrícula:</label>
-                        <input type="text" id="txtMatricula" placeholder="Nº" oninput="atualizarCampos()">
+                        <label>Data de Admissão:</label>
+                        <input type="text" id="txtAdmissao" placeholder="DD/MM/AAAA" oninput="atualizarCampos()">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Data de Admissão:</label>
-                    <input type="text" id="txtAdmissao" placeholder="DD/MM/AAAA" oninput="atualizarCampos()">
                 </div>
             </form>
 
@@ -340,13 +348,50 @@
 
     <script>
         let fotoBase64 = '';
+        let baseDadosColaboradores = [];
 
         window.onload = function() {
             const baseUrl = window.location.origin;
-            // Definindo as imagens padrão fixas no sistema
             document.getElementById('elLogoFrente').src = baseUrl + '/imagem/logo-frente.png';
             document.getElementById('elLogoVerso').src = baseUrl + '/imagem/logo-verso.png';
         };
+
+        function importarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
+                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function buscarPorMatricula() {
+            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
+            
+            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
+
+            const colaborador = baseDadosColaboradores.find(item => {
+                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
+                return mat === matriculaDigitada;
+            });
+
+            if (colaborador) {
+                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
+                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
+                document.getElementById('txtAdmissao').value = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
+
+                sincronizarNomes();
+                atualizarCampos();
+            }
+        }
 
         function sincronizarNomes() {
             const nome = document.getElementById('txtNome').value.toUpperCase();
@@ -391,53 +436,4 @@
                     elFoto.innerText = '';
                 } else {
                     elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            }
-
-            document.getElementById('elRg').innerText = document.getElementById('txtRg').value || '---';
-            document.getElementById('elAdmissao').innerText = document.getElementById('txtAdmissao').value || '---';
-            document.getElementById('elMatricula').innerText = document.getElementById('txtMatricula').value || '---';
-        }
-
-        function mudarFace(face) {
-            const faceFrente = document.getElementById('faceFrente');
-            const faceVerso = document.getElementById('faceVerso');
-            const btnFrente = document.getElementById('btnTabFrente');
-            const btnVerso = document.getElementById('btnTabVerso');
-
-            if (face === 'frente') {
-                faceFrente.style.display = 'block';
-                faceVerso.style.display = 'none';
-                btnFrente.classList.add('active');
-                btnVerso.classList.remove('active');
-            } else {
-                faceFrente.style.display = 'none';
-                faceVerso.style.display = 'flex'; 
-                btnVerso.classList.add('active');
-                btnFrente.classList.remove('active');
-            }
-        }
-
-        function imprimir(face) {
-            const body = document.body;
-            body.classList.remove('imprimir-frente', 'imprimir-verso');
-            
-            if (face === 'frente') {
-                body.classList.add('imprimir-frente');
-            } else {
-                body.classList.add('imprimir-verso');
-            }
-            window.print();
-        }
-    </script>
-</body>
-</html>
+                    el
