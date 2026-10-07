@@ -40,12 +40,8 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
             padding: 0 5px; box-sizing: border-box;
         }
-        .vertical .topo-bloco .nome-colaborador {
-            font-size: 10px; font-weight: bold; line-height: 1.1;
-        }
-        .vertical .topo-bloco .funcao-colaborador {
-            font-size: 8px; font-weight: normal; margin-top: 2px; opacity: 0.9; text-transform: uppercase;
-        }
+        .vertical .topo-bloco .nome-colaborador { font-size: 10px; font-weight: bold; line-height: 1.1; }
+        .vertical .topo-bloco .funcao-colaborador { font-size: 8px; font-weight: normal; margin-top: 2px; opacity: 0.9; text-transform: uppercase; }
 
         .vertical .foto-container {
             position: absolute; top: 78px; left: 37px; width: 130px; height: 150px;
@@ -56,13 +52,11 @@
             position: absolute; bottom: 0; left: 0; width: 100%; height: 45px;
             display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
         }
-        .vertical .logo-frente-img {
-            max-height: 35px; max-width: 150px; width: auto; object-fit: contain;
-        }
+        .vertical .logo-frente-img { max-height: 35px; max-width: 150px; width: auto; object-fit: contain; }
 
         /* Verso Vertical */
         .vertical #faceVerso { display: none; padding: 8px; box-sizing: border-box; background: #fff; flex-direction: column; justify-content: space-between; }
-        .vertical .verso-topo { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 4px; width: 100%; display: flex; justify-content: center; }
+        .vertical .verso-topo { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 4px; width: 100%; display: flex; justify-content: center; align-items: center; }
         .vertical .logo-verso-img { max-height: 28px; max-width: 120px; object-fit: contain; }
         .vertical .verso-caixas { display: flex; flex-direction: column; gap: 5px; width: 100%; }
         .vertical .caixa-campo { border: 1px solid #444; border-radius: 3px; padding: 3px 5px; background: #fafafa; font-size: 8px; display: flex; flex-direction: column; }
@@ -96,7 +90,11 @@
             position: absolute; top: 65px; left: 125px; right: 15px; display: flex; flex-direction: column; gap: 4px;
         }
         .horizontal .caixa-campo { border: 1px solid #444; border-radius: 3px; padding: 3px 5px; background: #fafafa; font-size: 8px; }
+
+        /* Verso Horizontal (Ajustado com topo centralizado para a logo não estourar) */
         .horizontal #faceVerso { display: none; padding: 10px; box-sizing: border-box; background: #fff; flex-direction: column; justify-content: space-between; }
+        .horizontal .verso-topo { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 4px; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .horizontal .logo-verso-img { max-height: 25px; max-width: 140px; object-fit: contain; }
 
         .tabs { display: flex; margin-bottom: 8px; gap: 5px; }
         .tabs button { margin: 0; padding: 5px; font-size: 11px; background: #6c757d; border: none; color: white; border-radius: 3px; cursor: pointer; flex: 1; }
@@ -126,18 +124,18 @@
         <div class="form-section">
             <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
             
-            <!-- Seletor de Modelos (Incluindo os 5 novos com Função) -->
+            <!-- Seletor de Modelos -->
             <div class="form-group" style="background: #e2e6ea; padding: 8px; border-radius: 5px;">
                 <label style="color: #333;">🎨 Escolher Modelo:</label>
                 <select id="selectTemplate" onchange="mudarTemplate()">
-                    <optgroup label="Modelos com Função do Funcionário (Novos)">
+                    <optgroup label="Modelos com Função do Funcionário">
                         <option value="v-funcao-preto">1. Vertical: Clássico com Função (Preto)</option>
                         <option value="v-funcao-azul">2. Vertical: Corporativo com Função (Azul)</option>
                         <option value="v-funcao-verde">3. Vertical: Operacional com Função (Verde)</option>
                         <option value="h-funcao-azul">4. Horizontal: Executivo com Função (Azul)</option>
                         <option value="h-funcao-preto">5. Horizontal: Clássico com Função (Preto)</option>
                     </optgroup>
-                    <optgroup label="Modelos Padrão Anteriores">
+                    <optgroup label="Modelos Padrão">
                         <option value="v-classico-preto">6. Vertical: Clássico Simples (Preto)</option>
                         <option value="v-executivo-azul">7. Vertical: Executivo Simples (Azul)</option>
                         <option value="v-moderno-verde">8. Vertical: Moderno Verde</option>
@@ -166,7 +164,6 @@
                     </div>
                 </div>
 
-                <!-- Campo Função / Cargo -->
                 <div class="form-group">
                     <label>Função / Cargo:</label>
                     <input type="text" id="txtFuncao" placeholder="Ex: Analista de Suporte" oninput="sincronizarFuncao()">
@@ -215,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- Campo Editável do Rodapé do Verso -->
                 <div class="form-group">
                     <label>Texto / Cultura do Rodapé (Verso):</label>
                     <textarea id="txtRodape" rows="2" oninput="atualizarRodape()">SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.</textarea>
@@ -258,269 +254,4 @@
                 <!-- VERSO -->
                 <div id="faceVerso">
                     <div class="verso-topo">
-                        <img id="elLogoVerso" class="logo-verso-img" alt="Logo Verso">
-                    </div>
-                    
-                    <div class="verso-caixas">
-                        <div class="caixa-campo">
-                            <span class="titulo">Nome Completo:</span>
-                            <span class="valor" id="elNomeVerso">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Função:</span>
-                            <span class="valor" id="elFuncaoVerso">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">RG:</span>
-                            <span class="valor" id="elRg">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Data de Admissão:</span>
-                            <span class="valor" id="elAdmissao">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Matrícula:</span>
-                            <span class="valor" id="elMatricula">---</span>
-                        </div>
-                    </div>
-
-                    <div class="verso-rodape-cultura" id="elRodapeVisual">
-                        <strong>NOSSA CULTURA:</strong>
-                        SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.
-                    </div>
-                </div>
-
-            </div>
-            <p style="font-size: 10px; color: #666; margin-top: 6px; text-align: center;">Zebra ZC100: Formato configurado.</p>
-        </div>
-    </div>
-
-    <script>
-        let fotoBase64 = '';
-        let baseDadosColaboradores = [];
-
-        window.onload = function() {
-            mudarTemplate();
-            atualizarRodape();
-        };
-
-        function mudarTemplate() {
-            const template = document.getElementById('selectTemplate').value;
-            const canvas = document.getElementById('badgeCanvas');
-            const topo = document.getElementById('elTopoFrente');
-            const baixo = document.getElementById('elBaixoFrente');
-            const dadosHoriz = document.getElementById('elDadosHoriz');
-            const funcaoFrente = document.getElementById('elFuncaoFrente');
-
-            let corFundo = '#111';
-            let isHorizontal = false;
-            let mostrarFuncao = false;
-
-            if (template.includes('azul')) corFundo = '#004080';
-            else if (template.includes('verde')) corFundo = '#006633';
-
-            if (template.includes('funcao')) {
-                mostrarFuncao = true;
-                funcaoFrente.style.display = 'block';
-            } else {
-                funcaoFrente.style.display = 'none';
-            }
-
-            if (template.startsWith('h-')) {
-                isHorizontal = true;
-            }
-
-            if (isHorizontal) {
-                canvas.className = 'badge-canvas horizontal';
-                topo.style.background = corFundo;
-                topo.style.color = '#fff';
-                baixo.style.background = corFundo;
-                baixo.style.display = 'flex';
-                dadosHoriz.style.display = 'flex';
-            } else {
-                canvas.className = 'badge-canvas vertical';
-                topo.style.background = corFundo;
-                topo.style.color = '#fff';
-                baixo.style.background = corFundo;
-                baixo.style.display = 'flex';
-                dadosHoriz.style.display = 'none';
-            }
-        }
-
-        function sincronizarNomes() {
-            const nome = document.getElementById('txtNome').value.toUpperCase();
-            document.getElementById('elNomeFrente').innerText = nome || 'NOME DO COLABORADOR';
-            document.getElementById('elNomeVerso').innerText = document.getElementById('txtNome').value || '---';
-        }
-
-        function sincronizarFuncao() {
-            const funcao = document.getElementById('txtFuncao').value.toUpperCase();
-            document.getElementById('elFuncaoFrente').innerText = funcao || 'FUNÇÃO';
-            document.getElementById('elFuncaoVerso').innerText = document.getElementById('txtFuncao').value || '---';
-        }
-
-        function atualizarRodape() {
-            const textoDigitado = document.getElementById('txtRodape').value;
-            document.getElementById('elRodapeVisual').innerHTML = `<strong>NOSSA CULTURA:</strong> ${textoDigitado}`;
-        }
-
-        function carregarLogoFrente(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('elLogoFrente').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function carregarLogoVerso(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('elLogoVerso').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function formatarDataExcel(valor) {
-            if (!valor) return '';
-            if (isNaN(valor)) return String(valor);
-            const num = Number(valor);
-            const dataBase = new Date(1899, 11, 30);
-            dataBase.setDate(dataBase.getDate() + num);
-            const dia = String(dataBase.getDate()).padStart(2, '0');
-            const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
-            const ano = dataBase.getFullYear();
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        function importarExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
-                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function buscarPorMatricula() {
-            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
-            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
-            const colaborador = baseDadosColaboradores.find(item => {
-                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
-                return mat === matriculaDigitada;
-            });
-            if (colaborador) {
-                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
-                document.getElementById('txtFuncao').value = colaborador.funcao || colaborador.Funcao || colaborador.FUNCAO || colaborador.cargo || colaborador.Cargo || '';
-                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
-                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
-                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
-                sincronizarNomes();
-                sincronizarFuncao();
-                atualizarCampos();
-            }
-        }
-
-        function alternarOrigemFoto() {
-            const tipo = document.getElementById('tipoFoto').value;
-            if (tipo === 'link') {
-                document.getElementById('divInputFotoLink').style.display = 'block';
-                document.getElementById('divInputFotoPc').style.display = 'none';
-            } else {
-                document.getElementById('divInputFotoLink').style.display = 'none';
-                document.getElementById('divInputFotoPc').style.display = 'block';
-            }
-            atualizarCampos();
-        }
-
-        function carregarFotoLocal(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoBase64 = e.target.result;
-                    const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function atualizarCampos() {
-            const tipo = document.getElementById('tipoFoto').value;
-            const elFoto = document.getElementById('elFoto');
-            if (tipo === 'link') {
-                const fotoUrl = document.getElementById('txtFotoUrl').value;
-                if (fotoUrl) {
-                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            }
-
-            const rgVal = document.getElementById('txtRg').value || '---';
-            const admVal = document.getElementById('txtAdmissao').value || '---';
-            const matVal = document.getElementById('txtMatricula').value || '---';
-
-            document.getElementById('elRg').innerText = rgVal;
-            document.getElementById('elAdmissao').innerText = admVal;
-            document.getElementById('elMatricula').innerText = matVal;
-
-            document.getElementById('elRgHoriz').innerText = rgVal;
-            document.getElementById('elAdmissaoHoriz').innerText = admVal;
-            document.getElementById('elMatriculaHoriz').innerText = matVal;
-        }
-
-        function mudarFace(face) {
-            const faceFrente = document.getElementById('faceFrente');
-            const faceVerso = document.getElementById('faceVerso');
-            const btnFrente = document.getElementById('btnTabFrente');
-            const btnVerso = document.getElementById('btnTabVerso');
-            if (face === 'frente') {
-                faceFrente.style.display = 'block';
-                faceVerso.style.display = 'none';
-                btnFrente.classList.add('active');
-                btnVerso.classList.remove('active');
-            } else {
-                faceFrente.style.display = 'none';
-                faceVerso.style.display = 'flex'; 
-                btnVerso.classList.add('active');
-                btnFrente.classList.remove('active');
-            }
-        }
-
-        function imprimir(face) {
-            const body = document.body;
-            body.classList.remove('imprimir-frente', 'imprimir-verso');
-            if (face === 'frente') {
-                body.classList.add('imprimir-frente');
-            } else {
-                body.classList.add('imprimir-verso');
-            }
-            window.print();
-        }
-    </script>
-</body>
-</html>
+                        <img id="elLogoVerso" class
