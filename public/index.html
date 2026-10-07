@@ -12,7 +12,7 @@
         .preview-section { flex: 0.7; display: flex; flex-direction: column; align-items: center; }
         .form-group { margin-bottom: 10px; }
         label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 11px; }
-        input, select { width: 100%; padding: 5px; box-sizing: border-box; font-size: 11px; }
+        input, select, textarea { width: 100%; padding: 5px; box-sizing: border-box; font-size: 11px; }
         .btn-acao { background: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; margin-top: 5px; font-size: 11px; }
         .btn-acao:hover { background: #0056b3; }
         .botoes-impressao { display: flex; gap: 8px; margin-top: 15px; }
@@ -29,47 +29,40 @@
             transition: all 0.3s ease;
         }
 
-        /* Formato Vertical (Padrão CR-80) */
-        .badge-canvas.vertical {
-            width: 204px;
-            height: 323px;
-        }
-
-        /* Formato Horizontal (Paisagem CR-80) */
-        .badge-canvas.horizontal {
-            width: 323px;
-            height: 204px;
-        }
+        .badge-canvas.vertical { width: 204px; height: 323px; }
+        .badge-canvas.horizontal { width: 323px; height: 204px; }
 
         /* ================= LAYOUTS VERTICAIS ================= */
         .vertical #faceFrente, .vertical #faceVerso { width: 100%; height: 100%; position: relative; }
         
-        .vertical .topo-preto {
+        .vertical .topo-bloco {
             position: absolute; top: 0; left: 0; width: 100%; height: 65px;
-            background: #111; color: #fff; display: flex; align-items: flex-end;
-            justify-content: center; text-align: center; font-size: 10px; font-weight: bold; padding-bottom: 8px; box-sizing: border-box;
+            display: flex; align-items: flex-end; justify-content: center; text-align: center;
+            font-size: 10px; font-weight: bold; padding-bottom: 8px; box-sizing: border-box;
         }
         .vertical .foto-container {
             position: absolute; top: 75px; left: 37px; width: 130px; height: 155px;
             border: 1.5px dashed #999; background: #eaeaea; background-size: cover; background-position: center;
             display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555;
         }
-        .vertical .baixo-preto {
+        .vertical .baixo-bloco {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 48px;
-            background: #111; display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
+            display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
         }
-        .vertical .logo-frente-img { max-height: 38px; max-width: 180px; width: 80%; object-fit: contain; }
+        .vertical .logo-frente-img {
+            max-height: 38px; max-width: 150px; width: auto; object-fit: contain;
+        }
 
         /* Verso Vertical */
         .vertical #faceVerso { display: none; padding: 8px; box-sizing: border-box; background: #fff; flex-direction: column; justify-content: space-between; }
         .vertical .verso-topo { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 4px; width: 100%; display: flex; justify-content: center; }
-        .vertical .logo-verso-img { max-height: 32px; width: 100%; object-fit: contain; }
-        .vertical .verso-caixas { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-        .vertical .caixa-campo { border: 1px solid #444; border-radius: 3px; padding: 4px 6px; background: #fafafa; font-size: 8px; display: flex; flex-direction: column; }
+        .vertical .logo-verso-img { max-height: 28px; max-width: 120px; object-fit: contain; }
+        .vertical .verso-caixas { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+        .vertical .caixa-campo { border: 1px solid #444; border-radius: 3px; padding: 3px 5px; background: #fafafa; font-size: 8px; display: flex; flex-direction: column; }
         .vertical .caixa-campo span.titulo { font-weight: bold; color: #555; font-size: 7px; text-transform: uppercase; }
         .vertical .caixa-campo span.valor { font-weight: bold; color: #111; font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .vertical .verso-rodape-cultura { background: #f2f2f2; border: 1px solid #ccc; padding: 5px; font-size: 7px; line-height: 1.25; color: #222; text-align: justify; border-radius: 3px; }
-        .vertical .verso-rodape-cultura strong { display: block; color: #000; margin-bottom: 1px; font-size: 7.5px; text-align: center; }
+        .vertical .verso-rodape-cultura { background: #f2f2f2; border: 1px solid #ccc; padding: 4px; font-size: 7px; line-height: 1.2; color: #222; text-align: justify; border-radius: 3px; max-height: 55px; overflow: hidden; }
+        .vertical .verso-rodape-cultura strong { display: block; color: #000; margin-bottom: 1px; font-size: 7px; text-align: center; }
 
         /* ================= LAYOUTS HORIZONTAIS ================= */
         .horizontal #faceFrente, .horizontal #faceVerso { width: 100%; height: 100%; position: relative; }
@@ -79,23 +72,20 @@
             border: 1.5px dashed #999; background: #eaeaea; background-size: cover; background-position: center;
             display: flex; align-items: center; justify-content: center; font-size: 9px; color: #555;
         }
-        .horizontal .topo-preto {
-            position: absolute; top: 15px; left: 125px; right: 15px; height: 45px;
-            background: #111; color: #fff; display: flex; align-items: center;
-            justify-content: center; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; box-sizing: border-box;
+        .horizontal .topo-bloco {
+            position: absolute; top: 15px; left: 125px; right: 15px; height: 40px;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 11px; font-weight: bold; padding: 0 5px; box-sizing: border-box;
         }
-        .horizontal .baixo-preto {
-            position: absolute; bottom: 15px; left: 15px; width: 100px; height: 40px;
-            background: #111; display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
+        .horizontal .baixo-bloco {
+            position: absolute; bottom: 15px; left: 15px; width: 100px; height: 35px;
+            display: flex; align-items: center; justify-content: center; padding: 0 5px; box-sizing: border-box;
         }
-        .horizontal .logo-frente-img { max-height: 30px; max-width: 90px; object-fit: contain; }
-        
+        .horizontal .logo-frente-img { max-height: 28px; max-width: 90px; object-fit: contain; }
         .horizontal .dados-horiz {
-            position: absolute; top: 70px; left: 125px; right: 15px; display: flex; flex-direction: column; gap: 4px;
+            position: absolute; top: 60px; left: 125px; right: 15px; display: flex; flex-direction: column; gap: 4px;
         }
         .horizontal .caixa-campo { border: 1px solid #444; border-radius: 3px; padding: 3px 5px; background: #fafafa; font-size: 8px; }
-
-        /* Verso Horizontal */
         .horizontal #faceVerso { display: none; padding: 10px; box-sizing: border-box; background: #fff; flex-direction: column; justify-content: space-between; }
 
         .tabs { display: flex; margin-bottom: 8px; gap: 5px; }
@@ -104,10 +94,7 @@
 
         /* Configuração de Impressão Térmica Dinâmica */
         @media print {
-            @page {
-                size: 54mm 85.6mm;
-                margin: 0;
-            }
+            @page { size: 54mm 85.6mm; margin: 0; }
             body, html { margin: 0 !important; padding: 0 !important; background: #fff !important; overflow: hidden !important; }
             .form-section, .tabs, .botoes-impressao, h3, p { display: none !important; }
             .container { display: block !important; padding: 0 !important; margin: 0 !important; border: none !important; box-shadow: none !important; background: #fff !important; }
@@ -129,13 +116,20 @@
         <div class="form-section">
             <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
             
-            <!-- Seletor de Templates e Modelos -->
+            <!-- Seletor de 10 Modelos Diferentes -->
             <div class="form-group" style="background: #e2e6ea; padding: 8px; border-radius: 5px;">
-                <label style="color: #333;">🎨 Escolher Modelo & Orientação:</label>
+                <label style="color: #333;">🎨 Escolher entre os 10 Modelos:</label>
                 <select id="selectTemplate" onchange="mudarTemplate()">
-                    <option value="vertical-classico">Modelo 1: Clássico Vertical (Tarjas Pretas)</option>
-                    <option value="vertical-executivo">Modelo 2: Executivo Vertical (Tarjas Azuis)</option>
-                    <option value="horizontal-classico">Modelo 3: Clássico Horizontal (Deitado)</option>
+                    <option value="v-classico-preto">1. Vertical: Clássico Preto</option>
+                    <option value="v-executivo-azul">2. Vertical: Executivo Azul Marinho</option>
+                    <option value="v-moderno-verde">3. Vertical: Moderno Verde Tecnológico</option>
+                    <option value="v-elegante-vinho">4. Vertical: Elegante Vinho/Bordô</option>
+                    <option value="v-alerta-laranja">5. Vertical: Destaque Laranja Corporativo</option>
+                    <option value="v-clean-cinza">6. Vertical: Clean Minimalista Cinza</option>
+                    <option value="h-classico-preto">7. Horizontal: Clássico Preto (Paisagem)</option>
+                    <option value="h-executivo-azul">8. Horizontal: Executivo Azul (Paisagem)</option>
+                    <option value="h-moderno-verde">9. Horizontal: Moderno Verde (Paisagem)</option>
+                    <option value="h-clean-cinza">10. Horizontal: Clean Minimalista (Paisagem)</option>
                 </select>
             </div>
 
@@ -193,282 +187,4 @@
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex: 1.5;">
                         <label>RG:</label>
-                        <input type="text" id="txtRg" placeholder="00.000.000-0" oninput="atualizarCampos()">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Data de Admissão:</label>
-                        <input type="text" id="txtAdmissao" placeholder="DD/MM/AAAA" oninput="atualizarCampos()">
-                    </div>
-                </div>
-            </form>
-
-            <div class="botoes-impressao">
-                <button class="btn-acao" style="background: #28a745;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
-                <button class="btn-acao" style="background: #17a2b8;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
-            </div>
-        </div>
-
-        <div class="preview-section">
-            <h3 style="margin-top:0; font-size: 14px;">Pré-visualização</h3>
-            <div class="tabs">
-                <button id="btnTabFrente" class="active" onclick="mudarFace('frente')">Frente</button>
-                <button id="btnTabVerso" onclick="mudarFace('verso')">Verso</button>
-            </div>
-
-            <!-- Canvas do Crachá Dinâmico -->
-            <div id="badgeCanvas" class="badge-canvas vertical">
-                
-                <!-- FRENTE -->
-                <div id="faceFrente">
-                    <div class="topo-preto" id="elTopoFrente">NOME DO COLABORADOR</div>
-                    <div class="foto-container" id="elFoto">Foto 3x4</div>
-                    <div class="baixo-preto" id="elBaixoFrente">
-                        <img id="elLogoFrente" class="logo-frente-img" alt="Logo Frente">
-                    </div>
-                    <div id="elDadosHoriz" class="dados-horiz" style="display: none;">
-                        <div class="caixa-campo"><span class="titulo">RG:</span> <span class="valor" id="elRgHoriz">---</span></div>
-                        <div class="caixa-campo"><span class="titulo">Admissão:</span> <span class="valor" id="elAdmissaoHoriz">---</span></div>
-                        <div class="caixa-campo"><span class="titulo">Matrícula:</span> <span class="valor" id="elMatriculaHoriz">---</span></div>
-                    </div>
-                </div>
-
-                <!-- VERSO -->
-                <div id="faceVerso">
-                    <div class="verso-topo">
-                        <img id="elLogoVerso" class="logo-verso-img" alt="Logo Verso">
-                    </div>
-                    
-                    <div class="verso-caixas">
-                        <div class="caixa-campo">
-                            <span class="titulo">Nome Completo:</span>
-                            <span class="valor" id="elNomeVerso">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">RG:</span>
-                            <span class="valor" id="elRg">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Data de Admissão:</span>
-                            <span class="valor" id="elAdmissao">---</span>
-                        </div>
-                        <div class="caixa-campo">
-                            <span class="titulo">Matrícula:</span>
-                            <span class="valor" id="elMatricula">---</span>
-                        </div>
-                    </div>
-
-                    <div class="verso-rodape-cultura">
-                        <strong>NOSSA CULTURA:</strong>
-                        SURPREENDER o cliente com PROFISSIONALISMO e sempre oferecer uma NOVIDADE para superar suas expectativas.
-                    </div>
-                </div>
-
-            </div>
-            <p style="font-size: 10px; color: #666; margin-top: 6px; text-align: center;">Zebra ZC100: Formato configurado.</p>
-        </div>
-    </div>
-
-    <script>
-        let fotoBase64 = '';
-        let baseDadosColaboradores = [];
-
-        window.onload = function() {
-            mudarTemplate();
-        };
-
-        function mudarTemplate() {
-            const template = document.getElementById('selectTemplate').value;
-            const canvas = document.getElementById('badgeCanvas');
-            const topo = document.getElementById('elTopoFrente');
-            const baixo = document.getElementById('elBaixoFrente');
-            const dadosHoriz = document.getElementById('elDadosHoriz');
-
-            if (template === 'vertical-classico') {
-                canvas.className = 'badge-canvas vertical';
-                topo.style.background = '#111';
-                topo.style.color = '#fff';
-                baixo.style.background = '#111';
-                baixo.style.display = 'flex';
-                dadosHoriz.style.display = 'none';
-            } else if (template === 'vertical-executivo') {
-                canvas.className = 'badge-canvas vertical';
-                topo.style.background = '#004080';
-                topo.style.color = '#fff';
-                baixo.style.background = '#004080';
-                baixo.style.display = 'flex';
-                dadosHoriz.style.display = 'none';
-            } else if (template === 'horizontal-classico') {
-                canvas.className = 'badge-canvas horizontal';
-                topo.style.background = '#111';
-                topo.style.color = '#fff';
-                baixo.style.background = '#111';
-                baixo.style.display = 'flex';
-                dadosHoriz.style.display = 'flex';
-            }
-        }
-
-        // Uploads Corrigidos das Logos
-        function carregarLogoFrente(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('elLogoFrente').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function carregarLogoVerso(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('elLogoVerso').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function formatarDataExcel(valor) {
-            if (!valor) return '';
-            if (isNaN(valor)) return String(valor);
-            const num = Number(valor);
-            const dataBase = new Date(1899, 11, 30);
-            dataBase.setDate(dataBase.getDate() + num);
-            const dia = String(dataBase.getDate()).padStart(2, '0');
-            const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
-            const ano = dataBase.getFullYear();
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        function importarExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
-                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function buscarPorMatricula() {
-            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
-            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
-            const colaborador = baseDadosColaboradores.find(item => {
-                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
-                return mat === matriculaDigitada;
-            });
-            if (colaborador) {
-                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
-                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
-                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
-                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
-                sincronizarNomes();
-                atualizarCampos();
-            }
-        }
-
-        function sincronizarNomes() {
-            const nome = document.getElementById('txtNome').value.toUpperCase();
-            document.getElementById('elTopoFrente').innerText = nome || 'NOME DO COLABORADOR';
-            document.getElementById('elNomeVerso').innerText = document.getElementById('txtNome').value || '---';
-        }
-
-        function alternarOrigemFoto() {
-            const tipo = document.getElementById('tipoFoto').value;
-            if (tipo === 'link') {
-                document.getElementById('divInputFotoLink').style.display = 'block';
-                document.getElementById('divInputFotoPc').style.display = 'none';
-            } else {
-                document.getElementById('divInputFotoLink').style.display = 'none';
-                document.getElementById('divInputFotoPc').style.display = 'block';
-            }
-            atualizarCampos();
-        }
-
-        function carregarFotoLocal(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoBase64 = e.target.result;
-                    const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function atualizarCampos() {
-            const tipo = document.getElementById('tipoFoto').value;
-            const elFoto = document.getElementById('elFoto');
-            if (tipo === 'link') {
-                const fotoUrl = document.getElementById('txtFotoUrl').value;
-                if (fotoUrl) {
-                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
-            }
-
-            const rgVal = document.getElementById('txtRg').value || '---';
-            const admVal = document.getElementById('txtAdmissao').value || '---';
-            const matVal = document.getElementById('txtMatricula').value || '---';
-
-            document.getElementById('elRg').innerText = rgVal;
-            document.getElementById('elAdmissao').innerText = admVal;
-            document.getElementById('elMatricula').innerText = matVal;
-
-            document.getElementById('elRgHoriz').innerText = rgVal;
-            document.getElementById('elAdmissaoHoriz').innerText = admVal;
-            document.getElementById('elMatriculaHoriz').innerText = matVal;
-        }
-
-        function mudarFace(face) {
-            const faceFrente = document.getElementById('faceFrente');
-            const faceVerso = document.getElementById('faceVerso');
-            const btnFrente = document.getElementById('btnTabFrente');
-            const btnVerso = document.getElementById('btnTabVerso');
-            if (face === 'frente') {
-                faceFrente.style.display = 'block';
-                faceVerso.style.display = 'none';
-                btnFrente.classList.add('active');
-                btnVerso.classList.remove('active');
-            } else {
-                faceFrente.style.display = 'none';
-                faceVerso.style.display = 'flex'; 
-                btnVerso.classList.add('active');
-                btnFrente.classList.remove('active');
-            }
-        }
-
-        function imprimir(face) {
-            const body = document.body;
-            body.classList.remove('imprimir-frente', 'imprimir-verso');
-            if (face === 'frente') {
-                body.classList.add('imprimir-frente');
-            } else {
-                body.classList.add('imprimir-verso');
-            }
-            window.print();
-        }
-    </script>
-</body>
-</html>
+                        <input type="
