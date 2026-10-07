@@ -171,7 +171,7 @@
         .tabs button { margin: 0; padding: 5px; font-size: 11px; background: #6c757d; border: none; color: white; border-radius: 3px; cursor: pointer; flex: 1; }
         .tabs button.active { background: #007bff; }
 
-        /* Configuração de Impressão Direta na Zebra ZC100 (Vertical) */
+        /* Configuração de Impressão Direta de Alta Nitidez na Zebra ZC100 */
         @media print {
             @page {
                 size: 54mm 85.6mm;
@@ -184,6 +184,8 @@
                 width: 54mm;
                 height: 85.6mm;
                 background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             body * { 
@@ -220,7 +222,15 @@
                 print-color-adjust: exact;
             }
 
-            .topo-preto, .baixo-preto, .logo-verso-img, .logo-frente-img {
+            /* Otimização de nitidez para impressoras térmicas Zebra */
+            img, .foto-container {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .topo-preto, .baixo-preto, .logo-verso-img, .logo-frente-img, .caixa-campo, .verso-rodape-cultura {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
