@@ -5,6 +5,8 @@
     <title>Emissor de Crachás - SyncStore & Zebra ZC100</title>
     <!-- Importando a biblioteca SheetJS para ler Excel (.xlsx / .xls) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Importando a biblioteca html2canvas para gerar a imagem do crachá -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; color: #333; margin: 0; }
         
@@ -332,8 +334,11 @@
             </form>
 
             <div class="botoes-impressao">
-                <button class="btn-acao" style="background: #28a745; width: 50%;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
-                <button class="btn-acao" style="background: #17a2b8; width: 50%;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
+                <button class="btn-acao" style="background: #28a745; flex: 1;" onclick="imprimir('frente')">🖨️ Imprimir Frente</button>
+                <button class="btn-acao" style="background: #17a2b8; flex: 1;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
+            </div>
+            <div style="margin-top: 8px;">
+                <button class="btn-acao" style="background: #6f42c1; width: 100%; padding: 10px;" onclick="baixarCrachaImagem()">💾 Gerar e Baixar Crachá (Imagem)</button>
             </div>
         </div>
 
@@ -414,7 +419,6 @@
 
         function realizarLogin(event) {
             event.preventDefault();
-            // Remove espaços extras nas pontas e converte o e-mail para minúsculas
             const userDigitado = document.getElementById('loginUser').value.trim().toLowerCase();
             const passDigitado = document.getElementById('loginPass').value.trim();
             const erroEl = document.getElementById('loginError');
@@ -680,6 +684,25 @@
                 body.classList.add('imprimir-verso');
             }
             window.print();
+        }
+
+        function baixarCrachaImagem() {
+            const canvasEl = document.getElementById('badgeCanvas');
+            const faceFrente = document.getElementById('faceFrente');
+            const faceVerso = document.getElementById('faceVerso');
+            
+            // Descobre qual lado está visível no momento (Frente ou Verso)
+            const isFrenteVisivel = faceFrente.style.display !== 'none';
+            const ladoNome = isFrenteVisivel ? 'frente' : 'verso';
+            const nomeColab = document.getElementById('txtNome').value.trim() || 'colaborador';
+
+            // Ajusta temporariamente para garantir que a captura saia perfeita em alta nitidez
+            html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `cracha-${ladoNome}-${nomeColab.toLowerCase().replace(/\s+/g, '-')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         }
     </script>
 </body>
