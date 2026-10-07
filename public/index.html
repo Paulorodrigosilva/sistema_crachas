@@ -410,3 +410,133 @@
             dataBase.setDate(dataBase.getDate() + num);
             const dia = String(dataBase.getDate()).padStart(2, '0');
             const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
+            const ano = dataBase.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function importarExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
+                document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function buscarPorMatricula() {
+            const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
+            if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
+            const colaborador = baseDadosColaboradores.find(item => {
+                const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
+                return mat === matriculaDigitada;
+            });
+            if (colaborador) {
+                document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
+                document.getElementById('txtFuncao').value = colaborador.funcao || colaborador.Funcao || colaborador.FUNCAO || colaborador.cargo || colaborador.Cargo || '';
+                document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
+                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
+                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
+                sincronizarNomes();
+                sincronizarFuncao();
+                atualizarCampos();
+            }
+        }
+
+        function alternarOrigemFoto() {
+            const tipo = document.getElementById('tipoFoto').value;
+            if (tipo === 'link') {
+                document.getElementById('divInputFotoLink').style.display = 'block';
+                document.getElementById('divInputFotoPc').style.display = 'none';
+            } else {
+                document.getElementById('divInputFotoLink').style.display = 'none';
+                document.getElementById('divInputFotoPc').style.display = 'block';
+            }
+            atualizarCampos();
+        }
+
+        function carregarFotoLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
+                    const elFoto = document.getElementById('elFoto');
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function atualizarCampos() {
+            const tipo = document.getElementById('tipoFoto').value;
+            const elFoto = document.getElementById('elFoto');
+            if (tipo === 'link') {
+                const fotoUrl = document.getElementById('txtFotoUrl').value;
+                if (fotoUrl) {
+                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
+                    elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            } else {
+                if (fotoBase64) {
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            }
+
+            const rgVal = document.getElementById('txtRg').value || '---';
+            const admVal = document.getElementById('txtAdmissao').value || '---';
+            const matVal = document.getElementById('txtMatricula').value || '---';
+
+            document.getElementById('elRg').innerText = rgVal;
+            document.getElementById('elAdmissao').innerText = admVal;
+            document.getElementById('elMatricula').innerText = matVal;
+
+            document.getElementById('elRgHoriz').innerText = rgVal;
+            document.getElementById('elAdmissaoHoriz').innerText = admVal;
+            document.getElementById('elMatriculaHoriz').innerText = matVal;
+        }
+
+        function mudarFace(face) {
+            const faceFrente = document.getElementById('faceFrente');
+            const faceVerso = document.getElementById('faceVerso');
+            const btnFrente = document.getElementById('btnTabFrente');
+            const btnVerso = document.getElementById('btnTabVerso');
+            if (face === 'frente') {
+                faceFrente.style.display = 'block';
+                faceVerso.style.display = 'none';
+                btnFrente.classList.add('active');
+                btnVerso.classList.remove('active');
+            } else {
+                faceFrente.style.display = 'none';
+                faceVerso.style.display = 'flex'; 
+                btnVerso.classList.add('active');
+                btnFrente.classList.remove('active');
+            }
+        }
+
+        function imprimir(face) {
+            const body = document.body;
+            body.classList.remove('imprimir-frente', 'imprimir-verso');
+            if (face === 'frente') {
+                body.classList.add('imprimir-frente');
+            } else {
+                body.classList.add('imprimir-verso');
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
