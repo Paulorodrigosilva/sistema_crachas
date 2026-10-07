@@ -326,7 +326,7 @@
                 <button class="btn-acao" style="background: #17a2b8; flex: 1;" onclick="imprimir('verso')">🖨 Imprimir Verso</button>
             </div>
             <div style="margin-top: 8px;">
-                <button class="btn-acao" style="background: #6f42c1; width: 100%; padding: 10px;" onclick="baixarCrachaImagem()">💾 Gerar e Baixar Crachá (Imagem)</button>
+                <button class="btn-acao" style="background: #6f42c1; width: 100%; padding: 10px;" onclick="baixarCrachaCompleto()">💾 Gerar e Baixar Crachá (Frente e Verso)</button>
             </div>
         </div>
 
@@ -650,19 +650,48 @@
             window.print();
         }
 
-        function baixarCrachaImagem() {
+        // Função para gerar a Frente e o Verso juntos em um único arquivo de imagem
+        async function baixarCrachaCompleto() {
             const canvasEl = document.getElementById('badgeCanvas');
             const faceFrente = document.getElementById('faceFrente');
-            const isFrenteVisivel = faceFrente.style.display !== 'none';
-            const ladoNome = isFrenteVisivel ? 'frente' : 'verso';
+            const faceVerso = document.getElementById('faceVerso');
             const nomeColab = document.getElementById('txtNome').value.trim() || 'colaborador';
+            const faceAtual = faceFrente.style.display !== 'none' ? 'frente' : 'verso';
 
-            html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `cracha-${ladoNome}-${nomeColab.toLowerCase().replace(/\s+/g, '-')}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            });
+            // 1. Captura a Frente
+            faceFrente.style.display = 'block';
+            faceVerso.style.display = 'none';
+            const canvasFrente = await html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null });
+
+            // 2. Captura o Verso
+            faceFrente.style.display = 'none';
+            faceVerso.style.display = 'flex';
+            const canvasVerso = await html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null });
+
+            // Retorna a visualização para a face que estava ativa antes do clique
+            mudarFace(faceAtual);
+
+            // 3. Une as duas imagens em um único canvas lado a lado com espaçamento
+            const mergedCanvas = document.createElement('canvas');
+            const ctx = mergedCanvas.getContext('2d');
+            const gap = 30; // Espaço entre a frente e o verso na imagem final
+
+            mergedCanvas.width = canvasFrente.width + canvasVerso.width + gap;
+            mergedCanvas.height = Math.max(canvasFrente.height, canvasVerso.height);
+
+            // Fundo branco limpo para a imagem unificada
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, mergedCanvas.width, mergedCanvas.height);
+
+            // Desenha Frente e Verso
+            ctx.drawImage(canvasFrente, 0, 0);
+            ctx.drawImage(canvasVerso, canvasFrente.width + gap, 0);
+
+            // 4. Dispara o download automático do arquivo unificado
+            const link = document.createElement('a');
+            link.download = `cracha-completo-${nomeColab.toLowerCase().replace(/\s+/g, '-')}.png`;
+            link.href = mergedCanvas.toDataURL('image/png');
+            link.click();
         }
     </script>
 </body>
