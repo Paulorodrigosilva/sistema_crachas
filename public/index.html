@@ -251,22 +251,10 @@
                     <input type="text" id="txtFuncao" placeholder="Ex: Analista de Suporte" oninput="sincronizarFuncao()">
                 </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Origem da Foto:</label>
-                        <select id="tipoFoto" onchange="alternarOrigemFoto()">
-                            <option value="link">Link da Internet</option>
-                            <option value="pc">Arquivo do PC</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;" id="divInputFotoLink">
-                        <label>Link da Foto:</label>
-                        <input type="text" id="txtFotoUrl" placeholder="https://..." oninput="atualizarCampos()">
-                    </div>
-                    <div class="form-group" style="flex: 1; display: none;" id="divInputFotoPc">
-                        <label>Arquivo Foto (PC):</label>
-                        <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
-                    </div>
+                <!-- Seleção Direta de Foto do PC (Igual aos Logos) -->
+                <div class="form-group">
+                    <label>Foto do Colaborador (PC):</label>
+                    <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
                 </div>
 
                 <!-- Configuração de Logos, Medidas e Movimentação -->
@@ -410,7 +398,7 @@
     </div>
 
     <script>
-        // Lista de contas autorizadas (com limpeza automática de espaços e letras maiúsculas/minúsculas)
+        // Lista de contas autorizadas
         const usuariosPermitidos = [
             { usuario: "prodrigosilvacel@gmail.com", senha: "W18187" },
             { usuario: "suporte.sync@syncstore.com", senha: "sync789" },
@@ -550,6 +538,20 @@
             }
         }
 
+        function carregarFotoLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
+                    const elFoto = document.getElementById('elFoto');
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function formatarDataExcel(valor) {
             if (!valor) return '';
             if (isNaN(valor)) return String(valor);
@@ -596,52 +598,14 @@
             }
         }
 
-        function alternarOrigemFoto() {
-            const tipo = document.getElementById('tipoFoto').value;
-            if (tipo === 'link') {
-                document.getElementById('divInputFotoLink').style.display = 'block';
-                document.getElementById('divInputFotoPc').style.display = 'none';
-            } else {
-                document.getElementById('divInputFotoLink').style.display = 'none';
-                document.getElementById('divInputFotoPc').style.display = 'block';
-            }
-            atualizarCampos();
-        }
-
-        function carregarFotoLocal(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoBase64 = e.target.result;
-                    const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
         function atualizarCampos() {
-            const tipo = document.getElementById('tipoFoto').value;
             const elFoto = document.getElementById('elFoto');
-            if (tipo === 'link') {
-                const fotoUrl = document.getElementById('txtFotoUrl').value;
-                if (fotoUrl) {
-                    elFoto.style.backgroundImage = `url('${fotoUrl}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
+            if (fotoBase64) {
+                elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                elFoto.innerText = '';
             } else {
-                if (fotoBase64) {
-                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
-                    elFoto.innerText = '';
-                } else {
-                    elFoto.style.backgroundImage = 'none';
-                    elFoto.innerText = 'Foto 3x4';
-                }
+                elFoto.style.backgroundImage = 'none';
+                elFoto.innerText = 'Foto 3x4';
             }
 
             const rgVal = document.getElementById('txtRg').value || '---';
@@ -689,14 +653,10 @@
         function baixarCrachaImagem() {
             const canvasEl = document.getElementById('badgeCanvas');
             const faceFrente = document.getElementById('faceFrente');
-            const faceVerso = document.getElementById('faceVerso');
-            
-            // Descobre qual lado está visível no momento (Frente ou Verso)
             const isFrenteVisivel = faceFrente.style.display !== 'none';
             const ladoNome = isFrenteVisivel ? 'frente' : 'verso';
             const nomeColab = document.getElementById('txtNome').value.trim() || 'colaborador';
 
-            // Ajusta temporariamente para garantir que a captura saia perfeita em alta nitidez
             html2canvas(canvasEl, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `cracha-${ladoNome}-${nomeColab.toLowerCase().replace(/\s+/g, '-')}.png`;
