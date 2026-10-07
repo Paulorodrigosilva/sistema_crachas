@@ -33,6 +33,7 @@
         /* FRENTE DO CRACHÁ (VERTICAL) */
         #faceFrente { width: 100%; height: 100%; position: relative; display: block; }
         
+        /* Topo padrão (Template 1) */
         .topo-preto {
             position: absolute;
             top: 0;
@@ -83,11 +84,10 @@
             box-sizing: border-box;
         }
         .logo-frente-img {
-            max-height: 98px;
+            max-height: 38px;
             max-width: 180px;
             width: 80%;
             object-fit: contain;
-            transform: translateY(-3px);
         }
 
         /* VERSO DO CRACHÁ (VERTICAL) */
@@ -171,7 +171,7 @@
         .tabs button { margin: 0; padding: 5px; font-size: 11px; background: #6c757d; border: none; color: white; border-radius: 3px; cursor: pointer; flex: 1; }
         .tabs button.active { background: #007bff; }
 
-        /* Configuração de Impressão Otimizada para Zebra ZC100 */
+        /* Configuração de Impressão para Zebra ZC100 */
         @media print {
             @page {
                 size: 54mm 85.6mm;
@@ -187,7 +187,6 @@
                 overflow: hidden !important;
             }
 
-            /* Oculta os formulários e botões de controle na impressão */
             .form-section, .tabs, .botoes-impressao, h3, p {
                 display: none !important;
             }
@@ -224,7 +223,6 @@
                 z-index: 9999 !important;
             }
 
-            /* Exibe estritamente o que foi solicitado (Frente ou Verso) */
             body.imprimir-frente #faceFrente {
                 display: block !important;
                 visibility: visible !important;
@@ -245,7 +243,6 @@
                 display: none !important;
             }
 
-            /* Alta nitidez térmica */
             img, .foto-container {
                 image-rendering: -webkit-optimize-contrast;
                 image-rendering: crisp-edges;
@@ -266,6 +263,16 @@
         <div class="form-section">
             <h3 style="margin-top:0; font-size: 15px;">Gerador de Crachás - Zebra ZC100</h3>
             
+            <!-- Seletor de Templates (Modelos) -->
+            <div class="form-group" style="background: #e2e6ea; padding: 8px; border-radius: 5px;">
+                <label style="color: #333;">🎨 Escolher Modelo (Template):</label>
+                <select id="selectTemplate" onchange="mudarTemplate()">
+                    <option value="1">Modelo 1: Clássico (Tarja Preta Topo & Rodapé)</option>
+                    <option value="2">Modelo 2: Executivo Azul (Visual Corporativo)</option>
+                    <option value="3">Modelo 3: Moderno Minimalista (Sem Tarjas, Clean)</option>
+                </select>
+            </div>
+
             <!-- Botão de Importar Excel -->
             <div class="form-group" style="background: #e9ecef; padding: 10px; border-radius: 5px; border: 1px dashed #ced4da;">
                 <label style="color: #0056b3;">📊 Importar Base de Dados (Excel):</label>
@@ -276,8 +283,8 @@
             <form id="formCracha" onsubmit="event.preventDefault();">
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex: 1;">
-                        <label>Matrícula (Digite para buscar):</label>
-                        <input type="text" id="txtMatricula" placeholder="Digite a matrícula..." oninput="buscarPorMatricula()">
+                        <label>Matrícula:</label>
+                        <input type="text" id="txtMatricula" placeholder="Matrícula..." oninput="buscarPorMatricula()">
                     </div>
                     <div class="form-group" style="flex: 1.5;">
                         <label>Nome no Crachá:</label>
@@ -289,8 +296,8 @@
                     <div class="form-group" style="flex: 1;">
                         <label>Origem da Foto:</label>
                         <select id="tipoFoto" onchange="alternarOrigemFoto()">
-                            <option value="link">Link da Internet (URL)</option>
-                            <option value="pc">Arquivo do Computador</option>
+                            <option value="link">Link da Internet</option>
+                            <option value="pc">Arquivo do PC</option>
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1;" id="divInputFotoLink">
@@ -298,8 +305,19 @@
                         <input type="text" id="txtFotoUrl" placeholder="https://..." oninput="atualizarCampos()">
                     </div>
                     <div class="form-group" style="flex: 1; display: none;" id="divInputFotoPc">
-                        <label>Arquivo da Foto (PC):</label>
+                        <label>Arquivo Foto (PC):</label>
                         <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Logo Frente (PC):</label>
+                        <input type="file" id="fileLogoFrente" accept="image/*" onchange="carregarLogoFrente(event)">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Logo Verso (PC):</label>
+                        <input type="file" id="fileLogoVerso" accept="image/*" onchange="carregarLogoVerso(event)">
                     </div>
                 </div>
 
@@ -336,9 +354,9 @@
                 
                 <!-- FRENTE -->
                 <div id="faceFrente">
-                    <div class="topo-preto" id="elNomeFrente">NOME DO COLABORADOR</div>
+                    <div class="topo-preto" id="elTopoFrente">NOME DO COLABORADOR</div>
                     <div class="foto-container" id="elFoto">Foto 3x4</div>
-                    <div class="baixo-preto">
+                    <div class="baixo-preto" id="elBaixoFrente">
                         <img id="elLogoFrente" class="logo-frente-img" alt="Logo Frente">
                     </div>
                 </div>
@@ -384,38 +402,82 @@
         let baseDadosColaboradores = [];
 
         window.onload = function() {
-            const baseUrl = window.location.origin;
-            document.getElementById('elLogoFrente').src = baseUrl + '/imagem/logo-frente.png';
-            document.getElementById('elLogoVerso').src = baseUrl + '/imagem/logo-verso.png';
+            mudarTemplate(); // Aplica o template inicial
         };
 
-        // Função para corrigir datas do Excel (converte número serial para DD/MM/AAAA)
+        // Sistema de Templates (Modelos de Crachá)
+        function mudarTemplate() {
+            const template = document.getElementById('selectTemplate').value;
+            const topo = document.getElementById('elTopoFrente');
+            const baixo = document.getElementById('elBaixoFrente');
+
+            if (template === '1') {
+                // Modelo 1: Clássico Preto
+                topo.style.background = '#111';
+                topo.style.color = '#fff';
+                baixo.style.background = '#111';
+                topo.style.display = 'flex';
+                baixo.style.display = 'flex';
+            } else if (template === '2') {
+                // Modelo 2: Executivo Azul
+                topo.style.background = '#004080';
+                topo.style.color = '#fff';
+                baixo.style.background = '#004080';
+                topo.style.display = 'flex';
+                baixo.style.display = 'flex';
+            } else if (template === '3') {
+                // Modelo 3: Minimalista Clean (sem tarjas pretas/azuis pesadas)
+                topo.style.background = 'transparent';
+                topo.style.color = '#000';
+                topo.style.borderBottom = '1px solid #ccc';
+                baixo.style.background = '#f8f9fa';
+            }
+        }
+
+        // Uploads Manuais de Logos via PC
+        function carregarLogoFrente(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('elLogoFrente').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function carregarLogoVerso(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('elLogoVerso').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function formatarDataExcel(valor) {
             if (!valor) return '';
             if (isNaN(valor)) return String(valor);
-            
             const num = Number(valor);
             const dataBase = new Date(1899, 11, 30);
             dataBase.setDate(dataBase.getDate() + num);
-            
             const dia = String(dataBase.getDate()).padStart(2, '0');
             const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
             const ano = dataBase.getFullYear();
-            
             return `${dia}/${mes}/${ano}`;
         }
 
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-
                 baseDadosColaboradores = XLSX.utils.sheet_to_json(worksheet);
                 document.getElementById('statusPlanilha').innerText = `✅ ${baseDadosColaboradores.length} registros carregados!`;
             };
@@ -424,21 +486,16 @@
 
         function buscarPorMatricula() {
             const matriculaDigitada = document.getElementById('txtMatricula').value.trim();
-            
             if (!matriculaDigitada || baseDadosColaboradores.length === 0) return;
-
             const colaborador = baseDadosColaboradores.find(item => {
                 const mat = String(item.matricula || item.Matricula || item.MATRICULA || '').trim();
                 return mat === matriculaDigitada;
             });
-
             if (colaborador) {
                 document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
                 document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
-                
                 const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
                 document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
-
                 sincronizarNomes();
                 atualizarCampos();
             }
@@ -446,7 +503,7 @@
 
         function sincronizarNomes() {
             const nome = document.getElementById('txtNome').value.toUpperCase();
-            document.getElementById('elNomeFrente').innerText = nome || 'NOME DO COLABORADOR';
+            document.getElementById('elTopoFrente').innerText = nome || 'NOME DO COLABORADOR';
             document.getElementById('elNomeVerso').innerText = document.getElementById('txtNome').value || '---';
         }
 
@@ -479,7 +536,6 @@
         function atualizarCampos() {
             const tipo = document.getElementById('tipoFoto').value;
             const elFoto = document.getElementById('elFoto');
-
             if (tipo === 'link') {
                 const fotoUrl = document.getElementById('txtFotoUrl').value;
                 if (fotoUrl) {
@@ -498,7 +554,6 @@
                     elFoto.innerText = 'Foto 3x4';
                 }
             }
-
             document.getElementById('elRg').innerText = document.getElementById('txtRg').value || '---';
             document.getElementById('elAdmissao').innerText = document.getElementById('txtAdmissao').value || '---';
             document.getElementById('elMatricula').innerText = document.getElementById('txtMatricula').value || '---';
@@ -509,31 +564,4 @@
             const faceVerso = document.getElementById('faceVerso');
             const btnFrente = document.getElementById('btnTabFrente');
             const btnVerso = document.getElementById('btnTabVerso');
-
-            if (face === 'frente') {
-                faceFrente.style.display = 'block';
-                faceVerso.style.display = 'none';
-                btnFrente.classList.add('active');
-                btnVerso.classList.remove('active');
-            } else {
-                faceFrente.style.display = 'none';
-                faceVerso.style.display = 'flex'; 
-                btnVerso.classList.add('active');
-                btnFrente.classList.remove('active');
-            }
-        }
-
-        function imprimir(face) {
-            const body = document.body;
-            body.classList.remove('imprimir-frente', 'imprimir-verso');
-            
-            if (face === 'frente') {
-                body.classList.add('imprimir-frente');
-            } else {
-                body.classList.add('imprimir-verso');
-            }
-            window.print();
-        }
-    </script>
-</body>
-</html>
+            if (face
