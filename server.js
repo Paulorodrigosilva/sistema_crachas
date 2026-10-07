@@ -41,6 +41,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota principal (corrige o erro Cannot GET / carregando o index.html)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Rota para upload
 app.post('/upload', upload.fields([
   { name: 'logoFrente', maxCount: 1 },
