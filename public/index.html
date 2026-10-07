@@ -436,4 +436,53 @@
                     elFoto.innerText = '';
                 } else {
                     elFoto.style.backgroundImage = 'none';
-                    el
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            } else {
+                if (fotoBase64) {
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
+                    elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
+                }
+            }
+
+            document.getElementById('elRg').innerText = document.getElementById('txtRg').value || '---';
+            document.getElementById('elAdmissao').innerText = document.getElementById('txtAdmissao').value || '---';
+            document.getElementById('elMatricula').innerText = document.getElementById('txtMatricula').value || '---';
+        }
+
+        function mudarFace(face) {
+            const faceFrente = document.getElementById('faceFrente');
+            const faceVerso = document.getElementById('faceVerso');
+            const btnFrente = document.getElementById('btnTabFrente');
+            const btnVerso = document.getElementById('btnTabVerso');
+
+            if (face === 'frente') {
+                faceFrente.style.display = 'block';
+                faceVerso.style.display = 'none';
+                btnFrente.classList.add('active');
+                btnVerso.classList.remove('active');
+            } else {
+                faceFrente.style.display = 'none';
+                faceVerso.style.display = 'flex'; 
+                btnVerso.classList.add('active');
+                btnFrente.classList.remove('active');
+            }
+        }
+
+        function imprimir(face) {
+            const body = document.body;
+            body.classList.remove('imprimir-frente', 'imprimir-verso');
+            
+            if (face === 'frente') {
+                body.classList.add('imprimir-frente');
+            } else {
+                body.classList.add('imprimir-verso');
+            }
+            window.print();
+        }
+    </script>
+</body>
+</html>
