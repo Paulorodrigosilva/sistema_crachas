@@ -37,7 +37,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 65px; /* Aumentado para descer mais o espaço */
+            height: 65px;
             background: #111;
             color: #fff;
             display: flex;
@@ -54,10 +54,10 @@
         /* Foto deslocada mais para baixo */
         .foto-container {
             position: absolute;
-            top: 75px; /* Ajustado proporcionalmente para baixo */
+            top: 75px;
             left: 37px;
             width: 130px;
-            height: 155px; /* Levemente ajustada para caber no espaço restante */
+            height: 155px;
             border: 1.5px dashed #999;
             background: #eaeaea;
             background-size: cover;
@@ -253,18 +253,7 @@
                     </div>
                     <div class="form-group" style="flex: 1; display: none;" id="divInputFotoPc">
                         <label>Arquivo da Foto (PC):</label>
-                        <input type="file" id="fileFotoPc" accept="image/*" onchange="enviarImagens()">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Atualizar Logo Frente (PC):</label>
-                        <input type="file" id="fileLogoFrente" accept="image/*" onchange="enviarImagens()">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Atualizar Logo Verso (PC):</label>
-                        <input type="file" id="fileLogoVerso" accept="image/*" onchange="enviarImagens()">
+                        <input type="file" id="fileFotoPc" accept="image/*" onchange="carregarFotoLocal(event)">
                     </div>
                 </div>
 
@@ -350,10 +339,11 @@
     </div>
 
     <script>
-        let urlFotoPc = '';
+        let fotoBase64 = '';
 
         window.onload = function() {
             const baseUrl = window.location.origin;
+            // Definindo as imagens padrão fixas no sistema
             document.getElementById('elLogoFrente').src = baseUrl + '/imagem/logo-frente.png';
             document.getElementById('elLogoVerso').src = baseUrl + '/imagem/logo-verso.png';
         };
@@ -376,43 +366,18 @@
             atualizarCampos();
         }
 
-        function enviarImagens() {
-            const logoFrenteInput = document.getElementById('fileLogoFrente');
-            const logoVersoInput = document.getElementById('fileLogoVerso');
-            const fotoPcInput = document.getElementById('fileFotoPc');
-
-            const temArquivo = (logoFrenteInput && logoFrenteInput.files[0]) || 
-                               (logoVersoInput && logoVersoInput.files[0]) || 
-                               (fotoPcInput && fotoPcInput.files[0]);
-
-            if (!temArquivo) return;
-
-            const formData = new FormData();
-            if (logoFrenteInput.files[0]) formData.append('logoFrente', logoFrenteInput.files[0]);
-            if (logoVersoInput.files[0]) formData.append('logoVerso', logoVersoInput.files[0]);
-            if (fotoPcInput && fotoPcInput.files[0]) formData.append('fotoPc', fotoPcInput.files[0]);
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                const baseUrl = window.location.origin;
-                if (data.logoFrente) {
-                    document.getElementById('elLogoFrente').src = baseUrl + data.logoFrente + '?t=' + new Date().getTime();
-                }
-                if (data.logoVerso) {
-                    document.getElementById('elLogoVerso').src = baseUrl + data.logoVerso + '?t=' + new Date().getTime();
-                }
-                if (data.fotoPc) {
-                    urlFotoPc = data.fotoPc;
+        function carregarFotoLocal(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoBase64 = e.target.result;
                     const elFoto = document.getElementById('elFoto');
-                    elFoto.style.backgroundImage = `url('${baseUrl + urlFotoPc}')`;
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
                     elFoto.innerText = '';
-                }
-            })
-            .catch(err => console.error('Erro ao enviar imagem', err));
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function atualizarCampos() {
@@ -429,10 +394,12 @@
                     elFoto.innerText = 'Foto 3x4';
                 }
             } else {
-                if (urlFotoPc) {
-                    const baseUrl = window.location.origin;
-                    elFoto.style.backgroundImage = `url('${baseUrl + urlFotoPc}')`;
+                if (fotoBase64) {
+                    elFoto.style.backgroundImage = `url('${fotoBase64}')`;
                     elFoto.innerText = '';
+                } else {
+                    elFoto.style.backgroundImage = 'none';
+                    elFoto.innerText = 'Foto 3x4';
                 }
             }
 
