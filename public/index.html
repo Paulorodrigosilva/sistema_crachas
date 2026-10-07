@@ -171,7 +171,7 @@
         .tabs button { margin: 0; padding: 5px; font-size: 11px; background: #6c757d; border: none; color: white; border-radius: 3px; cursor: pointer; flex: 1; }
         .tabs button.active { background: #007bff; }
 
-        /* Configuração de Impressão Direta de Alta Nitidez na Zebra ZC100 */
+        /* Configuração rigorosa de Impressão para Zebra ZC100 (Exatamente 1 página por face) */
         @media print {
             @page {
                 size: 54mm 85.6mm;
@@ -179,50 +179,54 @@
             }
 
             body, html {
-                margin: 0;
-                padding: 0;
-                width: 54mm;
-                height: 85.6mm;
-                background: #fff;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 54mm !important;
+                height: 85.6mm !important;
+                background: #fff !important;
+                overflow: hidden !important;
             }
 
             body * { 
-                visibility: hidden; 
+                display: none !important; 
+                visibility: hidden !important;
             }
 
-            .imprimir-frente #faceFrente, 
-            .imprimir-frente #faceFrente *,
-            .imprimir-verso #faceVerso, 
-            .imprimir-verso #faceVerso *,
-            .imprimir-verso #faceVerso img { 
-                visibility: visible !important; 
+            body.imprimir-frente,
+            body.imprimir-frente #badgeCanvas,
+            body.imprimir-frente #faceFrente,
+            body.imprimir-frente #faceFrente * {
                 display: block !important;
+                visibility: visible !important;
             }
 
-            .imprimir-verso #faceVerso {
+            body.imprimir-verso,
+            body.imprimir-verso #badgeCanvas,
+            body.imprimir-verso #faceVerso,
+            body.imprimir-verso #faceVerso * {
+                visibility: visible !important;
+            }
+
+            body.imprimir-verso #faceVerso {
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-between !important;
             }
 
             #badgeCanvas {
-                position: absolute;
-                left: 0;
-                top: 0;
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 54mm !important;
                 height: 85.6mm !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 box-shadow: none !important;
                 border: none !important;
                 background: #fff !important;
-                overflow: hidden;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                z-index: 9999 !important;
             }
 
-            /* Otimização de nitidez para impressoras térmicas Zebra */
             img, .foto-container {
                 image-rendering: -webkit-optimize-contrast;
                 image-rendering: crisp-edges;
@@ -366,6 +370,24 @@
             document.getElementById('elLogoVerso').src = baseUrl + '/imagem/logo-verso.png';
         };
 
+        // Função para corrigir datas do Excel (converte número serial para DD/MM/AAAA)
+        function formatarDataExcel(valor) {
+            if (!valor) return '';
+            // Se já for uma string (ex: "10/05/2023"), retorna ela mesma
+            if (isNaN(valor)) return String(valor);
+            
+            // Se for número serial do Excel
+            const num = Number(valor);
+            const dataBase = new Date(1899, 11, 30);
+            dataBase.setDate(dataBase.getDate() + num);
+            
+            const dia = String(dataBase.getDate()).padStart(2, '0');
+            const mes = String(dataBase.getMonth() + 1).padStart(2, '0');
+            const ano = dataBase.getFullYear();
+            
+            return `${dia}/${mes}/${ano}`;
+        }
+
         function importarExcel(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -396,7 +418,10 @@
             if (colaborador) {
                 document.getElementById('txtNome').value = colaborador.nome || colaborador.Nome || colaborador.NOME || '';
                 document.getElementById('txtRg').value = colaborador.rg || colaborador.Rg || colaborador.RG || '';
-                document.getElementById('txtAdmissao').value = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
+                
+                // Pega a data bruta da planilha e converte corretamente para formato DD/MM/AAAA
+                const dataBruta = colaborador.admissao || colaborador.Admissao || colaborador.ADMISSAO || '';
+                document.getElementById('txtAdmissao').value = formatarDataExcel(dataBruta);
 
                 sincronizarNomes();
                 atualizarCampos();
